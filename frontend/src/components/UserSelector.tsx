@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import {
   Input,
   InputBase,
@@ -6,22 +6,26 @@ import {
   useCombobox,
   Avatar,
   Modal,
+  Button,
 } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { StoreContext } from '../stores/StoreContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus, faUser } from '@fortawesome/free-solid-svg-icons';
+import { getUserTimeZone } from '../services/userTimeZone';
 
-const UserSelector = ({ data }) => {
-  console.log('data', data);
+const UserSelector = ({ data, handleSubmit }) => {
+  const [opened, { open, close }] = useDisclosure(false);
+  const { userStore } = useContext(StoreContext);
+
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
   });
 
-  const [value, setValue] = useState<string | null>(null);
-
   const options = [
     ...data.map((item) => (
       <Combobox.Option
-        value={item.id}
+        value={item}
         key={item.id}
         className='grid grid-cols-2 items-center'
       >
@@ -36,6 +40,7 @@ const UserSelector = ({ data }) => {
       value='create-new'
       key='create-new'
       className='grid grid-cols-2 items-center'
+      onClick={open}
     >
       <Avatar>
         <FontAwesomeIcon icon={faUserPlus} onClick={open} />
@@ -44,12 +49,19 @@ const UserSelector = ({ data }) => {
     </Combobox.Option>,
   ];
 
+  const onSubmit = async () => {
+    await handleSubmit(); // Call the handleSubmit from CoachUI
+    close(); // Close the modal after submission
+  };
+
   return (
     <>
       <Combobox
         store={combobox}
         onOptionSubmit={(val) => {
-          setValue(val);
+          userStore.setCurrentUser(val);
+          getUserTimeZone();
+          // setValue(val);
           combobox.closeDropdown();
         }}
       >
@@ -58,12 +70,13 @@ const UserSelector = ({ data }) => {
             onClick={() => combobox.toggleDropdown()}
             className='flex items-center'
           >
-            {value ? (
+            {userStore.currentUser !== null &&
+            userStore.currentUser !== 'create-new' ? (
               <>
                 <Avatar color='cyan' radius='xl' className='mr-2'>
-                  {data.find((item) => item.id === value)?.name.charAt(0)}
+                  {userStore.currentUser.name.charAt(0)}
                 </Avatar>
-                <span>{data.find((item) => item.id === value)?.name}</span>
+                <span>{userStore.currentUser.name}</span>
               </>
             ) : (
               <>
@@ -73,6 +86,25 @@ const UserSelector = ({ data }) => {
                 <span className='ml-2'>Sign In</span>
               </>
             )}
+            {/* {userStore.currentUser ? (
+              <>
+                <Avatar color='cyan' radius='xl' className='mr-2'>
+                  {data
+                    .find((item) => item == userStore.currentUser)
+                    ?.name.charAt(0)}
+                </Avatar>
+                <span>
+                  {data.find((item) => item == userStore.currentUser)?.name}
+                </span>
+              </>
+            ) : (
+              <>
+                <Avatar>
+                  <FontAwesomeIcon icon={faUser} />
+                </Avatar>
+                <span className='ml-2'>Sign In</span>
+              </>
+            )} */}
             <Combobox.Chevron className='self-center' />
           </div>
         </Combobox.Target>
@@ -82,31 +114,31 @@ const UserSelector = ({ data }) => {
         </Combobox.Dropdown>
       </Combobox>
 
-      {/* <Modal opened={opened} onClose={close} title='Add New Coach'>
+      <Modal opened={opened} onClose={close} title='Create New User'>
         <InputBase
           label='Your Name'
           type='text'
           placeholder='Name'
           onChange={(event) =>
-            coachStore.setNewCoachName(event.currentTarget.value)
+            userStore.setNewUserName(event.currentTarget.value)
           }
         ></InputBase>
         <InputBase
           label='Phone Number'
           placeholder='555-555-5555'
           onChange={(event) =>
-            coachStore.setNewCoachPhone(event.currentTarget.value)
+            userStore.setNewUserPhone(event.currentTarget.value)
           }
         ></InputBase>
         <Button
           variant='filled'
           color='green'
           className='mt-6'
-          onClick={handleSubmit}
+          onClick={onSubmit}
         >
           Submit
         </Button>
-      </Modal> */}
+      </Modal>
     </>
   );
 };

@@ -9,12 +9,14 @@ export interface StudentResponse {
   phone: string;
 }
 
+const url = 'http://localhost:5001';
+
 export const createStudent = async (
   studentData: StudentData
 ): Promise<StudentResponse | undefined> => {
   // Allowing for the possibility of undefined
   try {
-    const response = await fetch('http://localhost:5001/api/students', {
+    const response = await fetch(`${url}/api/students`, {
       // Ensure you include 'http://' for a valid URL
       method: 'POST',
       headers: {
@@ -31,5 +33,22 @@ export const createStudent = async (
   } catch (error) {
     console.error(`The User/Student couldn't be created`, error);
     return undefined; // Explicitly return undefined in case of an error
+  }
+};
+
+export const getAllStudents = async (): Promise<
+  StudentResponse[] | undefined
+> => {
+  try {
+    const response = await fetch(`${url}/api/students`);
+
+    if (!response.ok) {
+      throw new Error('Failed to retrieve all the students');
+    }
+
+    return (await response.json()) as StudentResponse;
+  } catch (error) {
+    console.error('Failure to retrieve all the students');
+    return undefined;
   }
 };

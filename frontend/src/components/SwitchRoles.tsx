@@ -4,14 +4,16 @@ import { observer } from 'mobx-react-lite';
 import { useContext } from 'react';
 
 const SwitchRoles = observer(() => {
-  const { uiStore } = useContext(StoreContext);
+  // const { uiStore } = useContext(StoreContext);
+  const { userStore } = useContext(StoreContext);
 
   const handleToggle = (value: string) => {
-    uiStore.toggleRole(value);
+    userStore.toggleRole(value);
+    userStore.currentUser = null;
   };
   return (
     <SegmentedControl
-      value={uiStore.role}
+      value={userStore.currentRole}
       onChange={handleToggle}
       data={[
         { label: 'Coach', value: 'coach' },

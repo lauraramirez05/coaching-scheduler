@@ -5,11 +5,15 @@ import SwitchRoles from './components/SwitchRoles';
 import { useContext } from 'react';
 import StudentUI from './components/StudentUI';
 import CoachUI from './components/CoachUI';
-import TestModal from './components/TestModal';
-import CreateUser from './components/CreateUser';
+import { getUserTimeZone } from './services/userTimeZone';
 
 const App = observer(() => {
-  const { uiStore } = useContext(StoreContext);
+  // const { uiStore } = useContext(StoreContext);
+  const { userStore } = useContext(StoreContext);
+
+  getUserTimeZone();
+  console.log('student timezone', userStore.userTimeZone);
+  
   return (
     <StoreContext.Provider value={rootStore}>
       <div>
@@ -18,7 +22,7 @@ const App = observer(() => {
           <SwitchRoles />
         </div>
 
-        {uiStore.role === 'student' ? <StudentUI /> : <CoachUI />}
+        {userStore.currentRole === 'student' ? <StudentUI /> : <CoachUI />}
       </div>
     </StoreContext.Provider>
   );
