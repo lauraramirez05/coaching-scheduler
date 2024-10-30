@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes } = require('sequelize');
+import { Sequelize, DataTypes } from 'sequelize';
 import sequelize from '../config/db';
 
 const StudentBookings = sequelize.define(

@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes } = require('sequelize');
+import { Sequelize, DataTypes } from 'sequelize';
 import sequelize from '../config/db';
 
 const TimeSlot = sequelize.define('TimeSlot', {
@@ -61,6 +61,7 @@ const TimeSlot = sequelize.define('TimeSlot', {
     type: DataTypes.TEXT,
     allowNull: true,
   },
+  tableName: 'time_slots',
 });
 
 export default TimeSlot;

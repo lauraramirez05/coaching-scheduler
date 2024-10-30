@@ -1,20 +1,26 @@
-import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
+import rootStore from './stores/rootStore';
 import { StoreContext } from './stores/StoreContext';
-import './index.css';
+import SwitchRoles from './components/SwitchRoles';
+import { useContext } from 'react';
+import StudentUI from './components/StudentUI';
+import CoachUI from './components/CoachUI';
+import TestModal from './components/TestModal';
+import CreateUser from './components/CreateUser';
 
 const App = observer(() => {
-  const [count, setCount] = useState(0);
-
+  const { uiStore } = useContext(StoreContext);
   return (
-    <>
-      <h1>Vite + React</h1>
-      <div className='card'>
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
+    <StoreContext.Provider value={rootStore}>
+      <div>
+        <div className='flex flex-col font-sans'>
+          <h1>Schedulink</h1>
+          <SwitchRoles />
+        </div>
+
+        {uiStore.role === 'student' ? <StudentUI /> : <CoachUI />}
       </div>
-    </>
+    </StoreContext.Provider>
   );
 });
 
