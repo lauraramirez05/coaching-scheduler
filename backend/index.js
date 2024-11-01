@@ -20,7 +20,7 @@ app.use('/api/students', studentRoutes);
 
 app.use('/api/coaches', coachRoutes);
 
-app.use('/api/timeSlot', timeSlotRoutes);
+app.use('/api/timeSlots', timeSlotRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`);

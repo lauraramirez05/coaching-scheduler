@@ -5,80 +5,90 @@ import moment from 'moment-timezone';
 
 // Add new time slot
 const addTimeSlot = async (req, res) => {
-  console.log('Request to add new time slot:', req.body);
-  const { startTime, endTime, coachId, timeZone } = req.body;
+  const { timeSlots, coachId, timeZone } = req.body;
 
-  // Local time conversion and validation
-  const startTimeLocal = moment.tz(startTime, timeZone);
-  const endTimeLocal = moment.tz(endTime, timeZone);
+  console.log('TIME SLOTS', timeSlots);
 
-  console.log('Local Time', [startTimeLocal.format(), endTimeLocal.format()]);
-
-  if (startTimeLocal.isBefore(moment())) {
-    return res
-      .status(400)
-      .json({ message: 'Start time must be today or in the future.' });
+  // Validate that timeSlots is provided and is an object
+  if (!timeSlots || typeof timeSlots !== 'object') {
+    return res.status(400).json({ message: 'Invalid time slots data.' });
   }
 
-  const businessStart = startTimeLocal.clone().set({ hour: 8, minute: 0 });
-  const businessEnd = startTimeLocal.clone().set({ hour: 18, minute: 0 });
+  const errors = [];
+  const createdLinks = [];
 
-  console.log('Business hours', [businessStart, businessEnd]);
+  // Process each time slot
+  for (const date in timeSlots) {
+    const { startTime, endTime } = timeSlots[date];
+    console.log('TIMES', [startTime, endTime]);
 
-  if (
-    startTimeLocal.isBefore(businessStart) ||
-    startTimeLocal.isAfter(businessEnd)
-  ) {
-    return res.status(400).json({
-      message:
-        'Start time must be between 8:00 AM and 6:00 PM in your timezone.',
-    });
-  }
+    // Local time conversion
+    const startTimeLocal = moment.tz(startTime, timeZone);
+    const endTimeLocal = moment.tz(endTime, timeZone);
 
-  // Convert to UTC
-  const startTimeUtc = startTimeLocal.utc().toISOString();
-  const endTimeUtc = endTimeLocal.utc().toISOString();
-  console.log('UTC times:', { startTimeUtc, endTimeUtc });
-
-  try {
-    const existingTimeSlot = await TimeSlot.findOne({
-      where: { start_time: startTimeUtc, end_time: endTimeUtc },
-    });
-
-    let timeSlotId;
-    if (!existingTimeSlot) {
-      const newTimeSlot = await TimeSlot.create({
-        start_time: startTimeUtc,
-        end_time: endTimeUtc,
-      });
-      console.log('New time slot created:', newTimeSlot);
-      timeSlotId = newTimeSlot.id;
-    } else {
-      timeSlotId = existingTimeSlot.id;
-      const duplicateSlotForCoach = await TimeSlotCoaches.findOne({
-        where: { coach_id: coachId, time_slot_id: timeSlotId },
-      });
-      if (duplicateSlotForCoach) {
-        return res.status(409).json({
-          message:
-            'A time slot already exists for this coach during the specified time.',
-        });
-      }
+    // Validate times
+    if (startTimeLocal.isBefore(moment())) {
+      errors.push(`Start time for ${date} must be today or in the future.`);
+      continue; // Skip to the next time slot
     }
 
-    const createdLink = await TimeSlotCoaches.create({
-      time_slot_id: timeSlotId,
-      coach_id: coachId,
-      status: 'available',
+    const businessStart = startTimeLocal.clone().set({ hour: 8, minute: 0 });
+    const businessEnd = startTimeLocal.clone().set({ hour: 18, minute: 0 });
+
+    if (
+      startTimeLocal.isBefore(businessStart) ||
+      startTimeLocal.isAfter(businessEnd)
+    ) {
+      errors.push(
+        `Start time for ${date} must be between 8:00 AM and 6:00 PM in your timezone.`
+      );
+      continue; // Skip to the next time slot
+    }
+
+    // Convert to UTC
+    const startTimeUtc = startTimeLocal.utc().toISOString();
+    const endTimeUtc = endTimeLocal.utc().toISOString();
+
+    try {
+      const existingTimeSlot = await TimeSlot.findOne({
+        where: { start_time: startTimeUtc, end_time: endTimeUtc },
+      });
+
+      let timeSlotId;
+      if (!existingTimeSlot) {
+        const newTimeSlot = await TimeSlot.create({
+          start_time: startTimeUtc,
+          end_time: endTimeUtc,
+        });
+        timeSlotId = newTimeSlot.id;
+      } else {
+        timeSlotId = existingTimeSlot.id;
+      }
+
+      // Create link for this time slot to the coach
+      const createdLink = await TimeSlotCoaches.create({
+        time_slot_id: timeSlotId,
+        coach_id: coachId,
+        status: 'available',
+      });
+      createdLinks.push(createdLink);
+    } catch (error) {
+      errors.push(`Error creating time slot for ${date}: ${error.message}`);
+    }
+  }
+
+  // Prepare response
+  if (errors.length > 0) {
+    res.status(207).json({
+      message: 'Partial success: some time slots were not added.',
+      errors,
+      createdLinks,
     });
-    console.log('Time slot linked to the coach:', createdLink);
-    res
-      .status(201)
-      .json({ message: 'Time slot added successfully', createdLink });
-  } catch (error) {
-    res
-      .status(400)
-      .json({ message: `The time slot couldn't be added: ${error.message}` });
+  } else {
+    res.status(201).json({
+      message: 'All valid time slots added successfully.',
+      createdLinks,
+    });
   }
 };
 

@@ -1,7 +1,6 @@
 import { Modal, Button } from '@mantine/core';
 import { observer } from 'mobx-react-lite';
 import { DatePicker } from '@mantine/dates';
-import type { TimePickerProps } from 'antd';
 import { TimePicker, Card } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -9,6 +8,8 @@ import timeSlotStore from '../stores/timeSlotStore';
 import { useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faX } from '@fortawesome/free-solid-svg-icons';
+import { createTimeSlots } from '../services/timeSlotServices';
+import userStore from '../stores/userStore';
 
 interface AddTimeSlotModalProps {
   opened: boolean;
@@ -143,6 +144,19 @@ const AddTimeSlotModal = ({ opened, onClose }: AddTimeSlotModalProps) => {
     }
   };
 
+  const handleSubmit = () => {
+    if (userStore.currentUser) {
+      const response = createTimeSlots({
+        timeSlots: timeSlotStore.timeSlots,
+        coachId: userStore.currentUser.id,
+        timeZone: userStore.userTimeZone,
+      });
+
+      console.log(response);
+    } else {
+      console.error('Current user is not available.');
+    }
+  };
   return (
     <Modal
       opened={opened}
@@ -260,7 +274,12 @@ const AddTimeSlotModal = ({ opened, onClose }: AddTimeSlotModalProps) => {
         </div>
       </div>
 
-      <Button variant='filled' color='green' className='mt-6' onClick={onClose}>
+      <Button
+        variant='filled'
+        color='green'
+        className='mt-6'
+        onClick={handleSubmit}
+      >
         Submit
       </Button>
     </Modal>
