@@ -12,10 +12,8 @@ import {
   createStudent,
   getAllStudents,
 } from '../services/studentServices';
-import { getUserTimeZone } from '../services/userTimeZone';
 
 const StudentUI = observer(() => {
-  // const [opened, { open, close }] = useDisclosure(false);
   const { studentStore } = useContext(StoreContext);
   const { userStore } = useContext(StoreContext);
 
@@ -40,11 +38,10 @@ const StudentUI = observer(() => {
 
     try {
       const createdStudent = await createStudent(studentData);
-      studentStore.addNewStudent(createStudent);
-      userStore.setCurrentUser(createStudent);
+      studentStore.addNewStudent(createdStudent);
+      userStore.setCurrentUser(createdStudent);
       userStore.setNewUserName('');
       userStore.setNewUserPhone('');
-      close();
     } catch (error) {
       console.error(`Error creating student`, error);
     }

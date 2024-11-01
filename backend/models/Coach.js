@@ -1,13 +1,13 @@
-import { Sequelize, DataTypes } from 'sequelize';
+import { Sequelize, DataTypes, UUIDV4 } from 'sequelize';
 import sequelize from '../config/db.js';
 
 const Coach = sequelize.define(
   'Coach',
   {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       primaryKey: true,
-      autoIncrement: true,
+      defaultValue: UUIDV4,
     },
     name: {
       type: DataTypes.STRING,
@@ -21,7 +21,7 @@ const Coach = sequelize.define(
   {
     sequelize,
     modelName: 'Coach',
-    tableName: 'coaches', 
+    tableName: 'coaches',
     timestamps: false,
   }
 );

@@ -1,16 +1,16 @@
-import { Sequelize, DataTypes } from 'sequelize';
+import { Sequelize, DataTypes, UUIDV4  } from 'sequelize';
 import sequelize from '../config/db';
 
 const StudentBookings = sequelize.define(
   'StudentBookings',
   {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       primaryKey: true,
-      autoIncrement: true,
+      defaultValue: UUIDV4,
     },
     student_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
       references: {
         model: 'students', // Name of the table in the database
@@ -18,7 +18,7 @@ const StudentBookings = sequelize.define(
       },
     },
     time_slot_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
       references: {
         model: 'time_slots', // Name of the table in the database

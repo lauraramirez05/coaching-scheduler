@@ -5,8 +5,11 @@ const createCoach = async (req, res) => {
   console.log(`Create coach controller`);
   const { name, phone } = req.body;
 
+  console.log('BODY', [name, phone]);
+
   try {
-    const newCoach = await Coach.create({ name, phone });
+    const newCoach = await Coach.create({ name: name, phone: phone });
+    console.log(newCoach);
     res.status(201).json(newCoach);
   } catch (error) {
     res.status(400).json({ message: `Error creating coach`, error });

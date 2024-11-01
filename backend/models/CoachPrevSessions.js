@@ -25,6 +25,14 @@ const CoachPrevSessions = sequelize.define(
         key: 'id',
       },
     },
+    rating: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    notes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   },
   {
     tableName: 'coach_previous_sessions', // Specify the table name

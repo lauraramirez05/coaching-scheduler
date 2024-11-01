@@ -1,7 +1,7 @@
 import { Sequelize } from 'sequelize';
 
 const sequelize = new Sequelize(
-  'coaching_scheduler_db',
+  'coaching_scheduler_db_2',
   'lauraramirez',
   'mugre2006',
   {

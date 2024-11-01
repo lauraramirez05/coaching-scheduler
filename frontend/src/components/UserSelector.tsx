@@ -1,6 +1,5 @@
 import { useState, useContext } from 'react';
 import {
-  Input,
   InputBase,
   Combobox,
   useCombobox,
@@ -86,25 +85,6 @@ const UserSelector = ({ data, handleSubmit }) => {
                 <span className='ml-2'>Sign In</span>
               </>
             )}
-            {/* {userStore.currentUser ? (
-              <>
-                <Avatar color='cyan' radius='xl' className='mr-2'>
-                  {data
-                    .find((item) => item == userStore.currentUser)
-                    ?.name.charAt(0)}
-                </Avatar>
-                <span>
-                  {data.find((item) => item == userStore.currentUser)?.name}
-                </span>
-              </>
-            ) : (
-              <>
-                <Avatar>
-                  <FontAwesomeIcon icon={faUser} />
-                </Avatar>
-                <span className='ml-2'>Sign In</span>
-              </>
-            )} */}
             <Combobox.Chevron className='self-center' />
           </div>
         </Combobox.Target>

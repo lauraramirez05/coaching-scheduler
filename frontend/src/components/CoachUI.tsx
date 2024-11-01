@@ -1,6 +1,10 @@
 import { useContext, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { StoreContext } from '../stores/StoreContext';
+import { Button, Modal, InputBase } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import AddTimeSlotModal from './AddTimeSlotModal';
+import '@mantine/dates/styles.css';
 import {
   CoachData,
   createCoach,
@@ -8,10 +12,10 @@ import {
   CoachResponse,
 } from '../services/coachServices';
 import UserSelector from './UserSelector';
-import { getUserTimeZone } from '../services/userTimeZone';
+import Calendar from './Calendar';
 
 const CoachUI = observer(() => {
-  // const [opened, { open, close }] = useDisclosure(false);
+  const [opened, { open, close }] = useDisclosure(false);
   const { coachStore } = useContext(StoreContext);
   const { userStore } = useContext(StoreContext);
 
@@ -50,10 +54,21 @@ const CoachUI = observer(() => {
       <div>
         <UserSelector data={coachStore.coaches} handleSubmit={handleSubmit} />
       </div>
-      <div>
-        <div>calendar</div>
-        <div>time slots</div>
+      <div className='flex justify-start w-full gap-4 p-1.5'>
+        <div>
+          <Calendar />
+        </div>
+        {userStore.currentUser && userStore.currentUser !== 'create-new' ? (
+          <div className='w-full flex justify-end'>
+            <Button onClick={open}>Add Time Slot</Button>
+          </div>
+        ) : (
+          <div className='text-center text-gray-600 flex items-center font-bold'>
+            Sign in/Create Account to add time slots
+          </div>
+        )}
       </div>
+      <AddTimeSlotModal opened={opened} onClose={close} />
     </div>
   );
 });

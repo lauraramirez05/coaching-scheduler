@@ -1,6 +1,7 @@
 import express from 'express';
 import studentRoutes from './routes/studentRoutes.js';
 import coachRoutes from './routes/coachRoutes.js';
+import timeSlotRoutes from './routes/timeSlotRoutes.js';
 import cors from 'cors';
 
 const app = express();
@@ -18,6 +19,8 @@ app.get('/', (req, res) => {
 app.use('/api/students', studentRoutes);
 
 app.use('/api/coaches', coachRoutes);
+
+app.use('/api/timeSlot', timeSlotRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`);
