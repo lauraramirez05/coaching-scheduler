@@ -46,7 +46,28 @@ export interface SelectedBooking {
   user_id: string;
 }
 
+interface BookTimeSlotSuccess {
+  data: {
+    updatedTimeSlot: {
+      id: number;
+      status: string;
+      participants: number[];
+      // add other properties as necessary from `updatedTimeSlot`
+    };
+    coachPhone: string;
+  };
+  status: 'success';
+  message: string;
+}
+
+interface BookTimeSlotError {
+  status: 'error';
+  message: string;
+}
+
 export type UpcomingMeetingsResponse = TimeSlotCoach[];
+
+export type BookTimeSlotResponse = BookTimeSlotSuccess | BookTimeSlotError;
 
 const url = 'http://localhost:5001';
 
@@ -109,7 +130,9 @@ export const getAllAvailableMeetingsForStudents = async (
   }
 };
 
-export const bookTimeSlot = async (bookingDetails: SelectedBooking) => {
+export const bookTimeSlot = async (
+  bookingDetails: SelectedBooking
+): Promise<BookTimeSlotResponse> => {
   try {
     const response = await fetch(`${url}/api/timeSlots/book`, {
       method: 'PATCH',

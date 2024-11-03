@@ -18,10 +18,8 @@ import Calendar from './Calendar';
 
 const CoachUI = observer(() => {
   const [opened, { open, close }] = useDisclosure(false);
-  const { coachStore } = useContext(StoreContext);
-  const { userStore } = useContext(StoreContext);
+  const { coachStore, userStore } = useContext(StoreContext);
 
-  console.log('upcoming meetings', coachStore.upcomingMeetings);
   useEffect(() => {
     const fetchCoaches = async () => {
       try {

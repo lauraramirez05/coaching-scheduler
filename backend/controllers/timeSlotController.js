@@ -21,9 +21,7 @@ const addTimeSlot = async (req, res) => {
 
   // Process each time slot
   for (const date in timeSlots) {
-    console.log('inside loop');
     const { startTime, endTime } = timeSlots[date];
-    console.log('TIMES', [startTime, endTime]);
 
     // Local time conversion
     const startTimeLocal = moment.tz(startTime, timeZone);
@@ -59,6 +57,37 @@ const addTimeSlot = async (req, res) => {
     console.log('Turn timo into UTC', [startTimeUtc, endTimeUtc]);
 
     try {
+      //check for overlapping timeslot
+      const overlappingTimeSlots = await sequelize.query(
+        `
+        SELECT *
+        FROM time_slot_coaches AS tsc
+        JOIN time_slots AS ts ON tsc.time_slot_id = ts.id
+        WHERE tsc.coach_id = :coachId
+        AND ts.start_time < :endTimeUtc
+        AND ts.end_time > :startTimeUtc;
+        `,
+        {
+          replacements: {
+            coachId: coachId,
+            endTimeUtc: endTimeUtc,
+            startTimeUtc: startTimeUtc,
+          },
+          type: sequelize.QueryTypes.SELECT,
+        }
+      );
+
+      if (overlappingTimeSlots.length > 0) {
+        errors.push(
+          `There is an overlapping time slot for this coach on ${moment(
+            date
+          ).format('dddd MMM D YYYY')} from ${moment(startTime).format(
+            'HH:mm '
+          )} to ${moment(endTime).format('HH:mm ')}`
+        );
+        continue;
+      }
+
       const existingTimeSlot = await TimeSlot.findOne({
         where: { start_time: startTimeUtc, end_time: endTimeUtc },
       });
@@ -223,8 +252,6 @@ const availableMeetingForStudents = async (req, res) => {
       availableMeetings = await sequelize.query(rawQuerySelectedCoaches, {
         type: sequelize.QueryTypes.SELECT,
       });
-
-      console.log(availableMeetings);
     } else {
       console.log('here');
       availableMeetings = await sequelize.query(rawQueryAllCoaches, {
@@ -265,12 +292,34 @@ const validateBookingData = async (req, res) => {
   // const { time_slot_id, coach_id, student_id } = bookingDetails;
 
   try {
-    const timeSlot = await TimeSlotCoaches.findOne({
-      where: {
-        time_slot_id,
-        coach_id,
-      },
-    });
+    const timeSlot = await sequelize.query(
+      `
+    SELECT 
+      tsc.id AS time_slot_coaches_id,
+      tsc.time_slot_id,
+      ts.start_time,
+      ts.end_time,
+      tsc.coach_id,
+      tsc.status,
+      tsc.participants
+    FROM 
+      time_slot_coaches AS tsc
+    JOIN 
+      time_slots AS ts ON tsc.time_slot_id = ts.id
+    WHERE 
+      tsc.time_slot_id = :timeSlotId
+    AND 
+      tsc.coach_id = :coachId
+    LIMIT 1;
+    `,
+      {
+        replacements: {
+          timeSlotId: time_slot_id,
+          coachId: coach_id,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
 
     // Check if the time slot exists and if it is already booked
     if (!timeSlot) {
@@ -278,13 +327,45 @@ const validateBookingData = async (req, res) => {
         .status(404)
         .json({ message: 'Time slot not found, refresh and try again' });
     }
-    console.log('Status', timeSlot.status);
     if (timeSlot.status === 'booked') {
       return res
         .status(400)
         .json({ message: 'This time slot is already booked' });
     }
-    console.log('hello');
+    console.log('SLOT', timeSlot);
+    const newStartTime = timeSlot[0].start_time;
+    const newEndTime = timeSlot[0].end_time;
+    console.log('NEW TIMES', [newStartTime, newEndTime]);
+
+    //check for overlapping
+
+    const overlappingBookings = await sequelize.query(
+      `
+    SELECT *
+    FROM time_slot_coaches AS tsc
+    JOIN time_slots AS ts ON tsc.time_slot_id = ts.id
+    WHERE tsc.participants = :studentId
+    AND (
+      (ts.start_time < :newEndTime AND ts.end_time > :newStartTime)
+    )
+    `,
+      {
+        replacements: {
+          studentId: student_id,
+          newStartTime: newStartTime,
+          newEndTime: newEndTime,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    if (overlappingBookings.length > 0) {
+      return res.status(400).json({
+        message:
+          'You have overlapping bookings, please choose a different time slot.',
+      });
+    }
+
     // Update the time slot to mark it as booked
     const updatedTimeSlot = await timeSlot.update({
       status: 'booked',
@@ -301,7 +382,6 @@ const validateBookingData = async (req, res) => {
     console.log('PHONE COACH', coach);
 
     return res.status(200).json({
-      message: 'Booking successful',
       updatedTimeSlot,
       coachPhone: coach.phone, // Send the coach's phone number
     });

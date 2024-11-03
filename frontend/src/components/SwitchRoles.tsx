@@ -5,11 +5,14 @@ import { useContext } from 'react';
 
 const SwitchRoles = observer(() => {
   // const { uiStore } = useContext(StoreContext);
-  const { userStore } = useContext(StoreContext);
+  const { userStore, coachStore, studentStore } = useContext(StoreContext);
 
   const handleToggle = (value: string) => {
     userStore.toggleRole(value);
     userStore.currentUser = null;
+
+    coachStore.resetCoachUI();
+    studentStore.resetStudentUI();
   };
   return (
     <SegmentedControl

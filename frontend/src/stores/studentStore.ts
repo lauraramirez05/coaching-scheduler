@@ -2,11 +2,18 @@ import { makeAutoObservable } from 'mobx';
 import { StudentData, StudentResponse } from '../services/studentServices';
 import {
   AvailableMeetingsStudents,
+  BookTimeSlotResponse,
   SelectedBooking,
 } from '../services/timeSlotServices';
 
 interface SelectedCoachesType {
   [id: string]: boolean;
+}
+
+interface BookingResponse {
+  status: string;
+  message: any;
+  data?: any;
 }
 
 class StudentStore {
@@ -20,7 +27,7 @@ class StudentStore {
     time_slot_id: '',
     user_id: '',
   };
-  confirmedBooking: {} | null = null;
+  confirmedBooking: BookTimeSlotResponse | null = null;
   errorCard: string = '';
 
   constructor() {
@@ -65,7 +72,8 @@ class StudentStore {
     };
   }
 
-  resetAfterBooking() {
+  resetStudentUI() {
+    this.displayedMeetings = [];
     this.filteredCoaches = {};
     this.selectedCoach = null;
     this.selectedBooking = { coach_id: '', time_slot_id: '', user_id: '' };
@@ -75,6 +83,10 @@ class StudentStore {
   setErrorCard(timeSlotId: string) {
     this.errorCard = timeSlotId;
     console.log(this.errorCard);
+  }
+
+  setConfirmedBooking(booking: BookTimeSlotResponse) {
+    this.confirmedBooking = booking;
   }
 }
 

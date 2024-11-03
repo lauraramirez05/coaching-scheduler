@@ -5,6 +5,7 @@ import { TimeSlot } from '../services/timeSlotServices';
 class TimeSlotStore {
   selectedDays: Dayjs[] = [];
   timeSlots: { [key: string]: TimeSlot } = {};
+  // calendarEvents = [];
 
   constructor() {
     makeAutoObservable(this);
@@ -67,6 +68,10 @@ class TimeSlotStore {
     this.selectedDays = [];
     this.timeSlots = {};
   }
+
+  // setCalendarEvents(value: {}) {
+  //   this.calendarEvents.push(value);
+  // }
 }
 
 const timeSlotStore = new TimeSlotStore();

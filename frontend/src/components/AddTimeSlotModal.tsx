@@ -5,12 +5,11 @@ import { TimePicker, Card } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import timeSlotStore from '../stores/timeSlotStore';
-import { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faX } from '@fortawesome/free-solid-svg-icons';
 import { createTimeSlots } from '../services/timeSlotServices';
-import userStore from '../stores/userStore';
-import coachStore from '../stores/coachStore';
+import { StoreContext } from '../stores/StoreContext';
 
 interface AddTimeSlotModalProps {
   opened: boolean;
@@ -26,6 +25,7 @@ type RangeDisabledTime = (
 };
 
 const AddTimeSlotModal = ({ opened, onClose }: AddTimeSlotModalProps) => {
+  const { coachStore, userStore } = useContext(StoreContext);
   dayjs.extend(customParseFormat);
 
   const today = dayjs().startOf('day');
@@ -159,7 +159,6 @@ const AddTimeSlotModal = ({ opened, onClose }: AddTimeSlotModalProps) => {
       console.log(response);
 
       if (response.errors && response.errors.length > 0) {
-        console.log('hello');
         const errorMessages = response.errors.map((err) => err).join('\n');
         console.log(errorMessages);
         alert(errorMessages);

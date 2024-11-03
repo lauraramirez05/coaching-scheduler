@@ -7,7 +7,9 @@ import { TimeSlotCoach } from '../services/timeSlotServices';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
-import userStore from '../stores/userStore';
+import { StoreContext } from '../stores/StoreContext';
+import { useContext } from 'react';
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -21,9 +23,12 @@ interface EventMeetingsType {
   date: string;
 }
 
-
 const Calendar: React.FC<CalendarProps> = ({ meetings }) => {
+  const { userStore } = useContext(StoreContext);
+
   const eventMeetings: EventMeetingsType[] = [];
+
+  console.log('meetings', meetings);
 
   if (meetings !== undefined) {
     meetings.forEach((meet) => {
@@ -37,6 +42,8 @@ const Calendar: React.FC<CalendarProps> = ({ meetings }) => {
       });
     });
   }
+
+  console.log('Event', eventMeetings);
 
   return (
     <div className='w-[800px] h-auto mx-auto p-0'>

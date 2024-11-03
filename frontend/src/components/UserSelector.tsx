@@ -18,12 +18,10 @@ import {
   getAllAvailableMeetingsForStudents,
   getUpcomingMeetingsForCoach,
 } from '../services/timeSlotServices';
-import coachStore from '../stores/coachStore';
-import studentStore from '../stores/studentStore';
 
 const UserSelector = ({ data, handleSubmit }) => {
   const [opened, { open, close }] = useDisclosure(false);
-  const { userStore } = useContext(StoreContext);
+  const { userStore, coachStore, studentStore } = useContext(StoreContext);
 
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),

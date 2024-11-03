@@ -33,6 +33,12 @@ class CoachStore {
       (a, b) => new Date(a.start_time) - new Date(b.start_time)
     );
   }
+
+  resetCoachUI() {
+    console.log('hey');
+    this.currentCoach = {};
+    this.setUpcomingMeetings([]);
+  }
 }
 
 const coachStore = new CoachStore();
