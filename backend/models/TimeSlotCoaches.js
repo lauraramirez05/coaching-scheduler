@@ -29,10 +29,6 @@ const TimeSlotCoaches = sequelize.define(
       type: DataTypes.ENUM('available', 'booked', 'completed'),
       allowNull: false,
     },
-    participants: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
     rating: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -41,11 +37,23 @@ const TimeSlotCoaches = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    participants: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
   },
   {
     tableName: 'time_slot_coaches', // Specify the table name if different from the default
     timestamps: false,
   }
 );
+
+// Define the associations outside the define method
+TimeSlotCoaches.associate = (models) => {
+  TimeSlotCoaches.belongsTo(models.TimeSlot, {
+    foreignKey: 'time_slot_id',
+    as: 'timeSlot', // This alias will be used for including
+  });
+};
 
 export default TimeSlotCoaches;

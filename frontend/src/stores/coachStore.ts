@@ -1,28 +1,18 @@
 import { makeAutoObservable } from 'mobx';
 import { CoachResponse } from '../services/coachServices';
+import {
+  TimeSlotCoach,
+  UpcomingMeetingsResponse,
+} from '../services/timeSlotServices';
 
 class CoachStore {
   coaches: CoachResponse[] = [];
-  // newCoachName: string = '';
-  // newCoachPhone: string = '';
-  // coachTimeZone: string = '';
   currentCoach = {};
+  upcomingMeetings: TimeSlotCoach[] = [];
 
   constructor() {
     makeAutoObservable(this);
   }
-
-  // setNewCoachName(value: string) {
-  //   this.newCoachName = value;
-  // }
-
-  // setNewCoachPhone(value: string) {
-  //   this.newCoachPhone = value;
-  // }
-
-  // setCoachTimeZone(value: string) {
-  //   this.coachTimeZone = value;
-  // }
 
   setCoaches(value: CoachResponse[]) {
     this.coaches = value;
@@ -30,6 +20,18 @@ class CoachStore {
 
   addNewCoach(value) {
     this.coaches = [...this.coaches, value];
+  }
+
+  setUpcomingMeetings(value: TimeSlotCoach[]) {
+    this.upcomingMeetings = value;
+    console.log(this.upcomingMeetings);
+  }
+
+  refreshUpcomingMeetings(value) {
+    this.upcomingMeetings.push(value);
+    this.upcomingMeetings.sort(
+      (a, b) => new Date(a.start_time) - new Date(b.start_time)
+    );
   }
 }
 

@@ -29,7 +29,6 @@ export const createCoach = async (
     return (await response.json()) as CoachResponse;
   } catch (error) {
     console.error(`The User/Coach coudln't be created`);
-    return undefined;
   }
 };
 
@@ -40,10 +39,9 @@ export const getAllCoaches = async (): Promise<CoachResponse[] | undefined> => {
     if (!response.ok) {
       throw new Error('Failed to retrieve all the coaches');
     }
-    
+
     return (await response.json()) as CoachResponse;
   } catch (error) {
     console.error(`Failure to retrieve all the coaches`);
-    return undefined;
   }
 };

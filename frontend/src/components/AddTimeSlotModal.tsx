@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faX } from '@fortawesome/free-solid-svg-icons';
 import { createTimeSlots } from '../services/timeSlotServices';
 import userStore from '../stores/userStore';
+import coachStore from '../stores/coachStore';
 
 interface AddTimeSlotModalProps {
   opened: boolean;
@@ -33,12 +34,12 @@ const AddTimeSlotModal = ({ opened, onClose }: AddTimeSlotModalProps) => {
     timeSlotStore.setSelectedDays(today);
   };
 
-  const changeStartTime = (day: Dayjs, time: string) => {
-    timeSlotStore.updateTimeSlots(day, time, '');
+  const changeStartTime = (day: Dayjs) => {
+    timeSlotStore.updateTimeSlots(day, day.format('YYYY-MM-DDTHH:mm:ssZ'), '');
   };
 
-  const changeEndTime = (day: Dayjs, time: string) => {
-    timeSlotStore.updateTimeSlots(day, '', time);
+  const changeEndTime = (day: Dayjs) => {
+    timeSlotStore.updateTimeSlots(day, '', day.format('YYYY-MM-DDTHH:mm:ssZ'));
     timeSlotStore.isSessionValid(day);
   };
 
@@ -144,13 +145,26 @@ const AddTimeSlotModal = ({ opened, onClose }: AddTimeSlotModalProps) => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (userStore.currentUser) {
-      const response = createTimeSlots({
+      const response = await createTimeSlots({
         timeSlots: timeSlotStore.timeSlots,
         coachId: userStore.currentUser.id,
         timeZone: userStore.userTimeZone,
       });
+      const approvedTimeSlots = response.createdLinks;
+      approvedTimeSlots.forEach((slot) => {
+        coachStore.refreshUpcomingMeetings(slot);
+      });
+      // console.log(response.createdLinks);
+      // // console.log('helliii', timeSlotStore.timeSlots);
+      // // for (const slot in response) {
+      // //   console.log(slot);
+      // //   coachStore.refreshUpcomingMeetings(slot);
+      // // }
+      onClose();
+
+      timeSlotStore.resetSelectedDays();
 
       console.log(response);
     } else {
@@ -212,9 +226,9 @@ const AddTimeSlotModal = ({ opened, onClose }: AddTimeSlotModalProps) => {
                             timeSlotStore.timeSlots[
                               dayjs(day).format('YYYY-MM-DD')
                             ].startTime,
-                            'HH:mm'
-                          )
-                        : dayjs(day).hour(8).minute(0)
+                            'YYYY-MM-DDTHH:mm:ssZ' // Correct input format
+                          ) // Keep it as a Day.js object
+                        : dayjs(day).hour(10).minute(0) // Default time as Day.js object
                     }
                     format='HH:mm'
                     disabledTime={(now) => getDisabledTime(dayjs(now), 'start')}
@@ -231,9 +245,9 @@ const AddTimeSlotModal = ({ opened, onClose }: AddTimeSlotModalProps) => {
                             timeSlotStore.timeSlots[
                               dayjs(day).format('YYYY-MM-DD')
                             ].endTime,
-                            'HH:mm'
-                          )
-                        : dayjs(day).hour(10).minute(0)
+                            'YYYY-MM-DDTHH:mm:ssZ' // Correct input format
+                          ) // Keep it as a Day.js object
+                        : dayjs(day).hour(10).minute(0) // Default time as Day.js object
                     }
                     format='HH:mm'
                     disabledTime={(now) => getDisabledTime(dayjs(now), 'end')}

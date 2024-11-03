@@ -6,7 +6,6 @@ class UserStore {
   currentUser: CoachResponse | null | string = null;
   newUserName: string = '';
   newUserPhone: string = '';
-  // newUserRole: string = '';
   userTimeZone: string = '';
 
   constructor() {

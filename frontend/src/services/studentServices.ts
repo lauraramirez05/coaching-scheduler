@@ -32,7 +32,6 @@ export const createStudent = async (
     return (await response.json()) as StudentResponse; // Ensure you return the response
   } catch (error) {
     console.error(`The User/Student couldn't be created`, error);
-    return undefined; // Explicitly return undefined in case of an error
   }
 };
 
@@ -49,6 +48,5 @@ export const getAllStudents = async (): Promise<
     return (await response.json()) as StudentResponse;
   } catch (error) {
     console.error('Failure to retrieve all the students');
-    return undefined;
   }
 };

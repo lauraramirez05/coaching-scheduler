@@ -8,10 +8,18 @@ import {
   Button,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { observer } from 'mobx-react-lite';
 import { StoreContext } from '../stores/StoreContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus, faUser } from '@fortawesome/free-solid-svg-icons';
 import { getUserTimeZone } from '../services/userTimeZone';
+import {
+  AvailableMeetingsStudents,
+  getAllAvailableMeetingsForStudents,
+  getUpcomingMeetingsForCoach,
+} from '../services/timeSlotServices';
+import coachStore from '../stores/coachStore';
+import studentStore from '../stores/studentStore';
 
 const UserSelector = ({ data, handleSubmit }) => {
   const [opened, { open, close }] = useDisclosure(false);
@@ -20,6 +28,36 @@ const UserSelector = ({ data, handleSubmit }) => {
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
   });
+
+  const fetchUpcomingMeetingsCoaches = async () => {
+    console.log('fetching');
+    if (userStore.currentRole === 'coach') {
+      if (userStore.currentUser) {
+        try {
+          const result = await getUpcomingMeetingsForCoach(
+            userStore.currentUser.id,
+            userStore.userTimeZone
+          );
+          coachStore.setUpcomingMeetings(result);
+        } catch (error) {
+          console.error('Error fetching upcoming meetings:', error);
+        }
+      }
+    }
+  };
+
+  const fetchAvailableMeetings = async () => {
+    try {
+      const availableMeetings: AvailableMeetingsStudents[] =
+        (await getAllAvailableMeetingsForStudents()) || [];
+      studentStore.setAvailableMeetings(Object.values(availableMeetings));
+    } catch (error) {
+      console.error(
+        `Error is ${fetchAvailableMeetings}, couldn't get the meetings`,
+        error
+      );
+    }
+  };
 
   const options = [
     ...data.map((item) => (
@@ -48,21 +86,29 @@ const UserSelector = ({ data, handleSubmit }) => {
     </Combobox.Option>,
   ];
 
+  const handleUserSelection = (val) => {
+    userStore.setCurrentUser(val);
+    getUserTimeZone();
+
+    if (userStore.currentRole === 'coach') {
+      fetchUpcomingMeetingsCoaches();
+    } else if (userStore.currentRole === 'student') {
+      fetchAvailableMeetings();
+    }
+
+    combobox.closeDropdown();
+  };
+
   const onSubmit = async () => {
-    await handleSubmit(); // Call the handleSubmit from CoachUI
-    close(); // Close the modal after submission
+    await handleSubmit();
+    close();
   };
 
   return (
     <>
       <Combobox
         store={combobox}
-        onOptionSubmit={(val) => {
-          userStore.setCurrentUser(val);
-          getUserTimeZone();
-          // setValue(val);
-          combobox.closeDropdown();
-        }}
+        onOptionSubmit={(val) => handleUserSelection(val)}
       >
         <Combobox.Target className='cursor-pointer bg-white border border-gray-300 rounded-md px-3 py-2 max-w-xs mx-auto flex items-center justify-center'>
           <div
@@ -123,4 +169,4 @@ const UserSelector = ({ data, handleSubmit }) => {
   );
 };
 
-export default UserSelector;
+export default observer(UserSelector);

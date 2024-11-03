@@ -24,7 +24,6 @@ const getAllCoaches = async (req, res) => {
     const coaches = await Coach.findAll();
     res.status(201).json(coaches);
   } catch (error) {
-    console.log('hey');
     res.status(400).json({ message: 'Error retrieving all users' });
   }
 };

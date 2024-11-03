@@ -2,35 +2,65 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import { observer } from 'mobx-react-lite';
+import { TimeSlotCoach } from '../services/timeSlotServices';
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+import userStore from '../stores/userStore';
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
-const Calendar = () => {
+// Define props interface
+interface CalendarProps {
+  meetings: TimeSlotCoach[];
+}
+
+interface EventMeetingsType {
+  title: string;
+  date: string;
+}
+
+
+const Calendar: React.FC<CalendarProps> = ({ meetings }) => {
+  const eventMeetings: EventMeetingsType[] = [];
+
+  if (meetings !== undefined) {
+    meetings.forEach((meet) => {
+      eventMeetings.push({
+        title: `${dayjs(meet.start_time).format('H a')} - ${dayjs(
+          meet.end_time
+        ).format('H a')}`,
+        // Convert to the desired timezone if needed, e.g., 'America/New_York'
+        start: dayjs(meet.start_time).tz(userStore.userTimeZone).toISOString(),
+        end: dayjs(meet.end_time).tz(userStore.userTimeZone).toISOString(),
+      });
+    });
+  }
+
   return (
-    <div className='w-[600px] h-auto mx-auto p-0'>
+    <div className='w-[800px] h-auto mx-auto p-0'>
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView='dayGridMonth' // Default view
+        initialView='timeGridWeek'
         headerToolbar={{
-          left: 'prev,next today', // Buttons to navigate between months
-          center: 'title', // Title of the calendar
-          right: 'dayGridMonth,timeGridWeek,timeGridDay', // View switcher
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay',
         }}
+        events={eventMeetings}
         views={{
           dayGridMonth: {
-            // Configuration for monthly view
+            displayEventTime: false, // Show times in monthly view
           },
           timeGridWeek: {
-            // Configuration for weekly view
-            slotDuration: '00:30:00', // Sets the duration of each slot
-          },
-          timeGridDay: {
-            // Configuration for daily view
-            slotDuration: '00:30:00', // Sets the duration of each slot
+            slotDuration: '01:00:00',
           },
         }}
-        // Additional options can go here, such as events, date settings, etc.
+        allDaySlot={false}
       />
     </div>
   );
 };
 
-export default Calendar;
+export default observer(Calendar);

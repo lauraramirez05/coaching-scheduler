@@ -10,7 +10,7 @@ class TimeSlotStore {
     makeAutoObservable(this);
   }
 
-  setSelectedDays(day: Dayjs) {
+  setSelectedDays(day: Date | Dayjs) {
     this.selectedDays.push(day);
     console.log(this.selectedDays);
 
@@ -38,19 +38,17 @@ class TimeSlotStore {
   }
 
   updateTimeSlots(date: Dayjs, startTime: string, endTime: string) {
+    console.log('day', startTime);
     const dateStr = dayjs(date).format('YYYY-MM-DD');
     const slot = this.timeSlots[dateStr];
 
     if (slot && startTime !== '') {
       slot.startTime = startTime;
-      const time = dayjs(startTime, 'HH:mm');
-      slot.endTime = time.add(2, 'hour').format('HH:mm');
-      console.log(this.timeSlots);
+      const time = dayjs(startTime);
+      slot.endTime = time.add(2, 'hour').format('YYYY-MM-DDTHH:mm:ssZ'); // Format as needed
     } else if (slot && endTime !== '') {
       slot.endTime = endTime;
     }
-
-    console.log(this.timeSlots);
   }
 
   isSessionValid(date: Dayjs) {

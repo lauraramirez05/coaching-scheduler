@@ -11,4 +11,6 @@ router.post('/', createStudent);
 
 router.get('/', getAllStudents);
 
+
+
 export default router;

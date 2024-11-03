@@ -1,11 +1,26 @@
 import { makeAutoObservable } from 'mobx';
 import { StudentData, StudentResponse } from '../services/studentServices';
+import {
+  AvailableMeetingsStudents,
+  SelectedBooking,
+} from '../services/timeSlotServices';
+
+interface SelectedCoachesType {
+  [id: string]: boolean;
+}
 
 class StudentStore {
-  // studentTimeZone: string = '';
   students: StudentData[] = [];
-  // newUserName: string = '';
-  // newUserPhone: string = '';
+  availableMeetings: AvailableMeetingsStudents[] = [];
+  displayedMeetings: AvailableMeetingsStudents[] = [];
+  filteredCoaches: SelectedCoachesType = {};
+  selectedCoach: string | null = null;
+  selectedBooking: SelectedBooking = {
+    coach_id: '',
+    time_slot_id: '',
+    user_id: '',
+  };
+  confirmedBooking: {} | null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -19,17 +34,44 @@ class StudentStore {
     this.students = [...this.students, value];
   }
 
-  // setStudentTimeZone(value: string) {
-  //   this.studentTimeZone = value;
-  // }
+  setAvailableMeetings(meetings) {
+    this.availableMeetings = meetings;
+    this.setDisplayedMeetings(meetings);
+  }
 
-  // setNewUserName(value: string) {
-  //   this.newUserName = value;
-  // }
+  setDisplayedMeetings(meetings) {
+    this.displayedMeetings = meetings;
+  }
 
-  // setNewUserPhone(value: string) {
-  //   this.newUserPhone = value;
-  // }
+  setSelectedCoach(coachId: string) {
+    this.selectedCoach = coachId;
+  }
+
+  setSelectedBooking(coachId: string, timeSlotId: string, userId: string) {
+    this.selectedBooking = {
+      coach_id: coachId,
+      time_slot_id: timeSlotId,
+      user_id: userId,
+    };
+
+    console.log('booking', this.selectedBooking);
+  }
+
+  setFilteredCoaches(coachId: string) {
+    this.filteredCoaches = {
+      ...this.filteredCoaches,
+      [coachId]: !this.filteredCoaches[coachId],
+    };
+  }
+
+  resetAfterBooking() {
+    this.availableMeetings = [];
+    this.displayedMeetings = [];
+    this.filteredCoaches = {};
+    this.selectedCoach = null;
+    this.selectedBooking = { coach_id: '', time_slot_id: '', user_id: '' };
+    this.confirmedBooking = null;
+  }
 }
 
 const studentStore = new StudentStore();
