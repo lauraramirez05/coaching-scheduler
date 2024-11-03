@@ -97,15 +97,11 @@ const CoachUI = observer(() => {
                     <div>
                       <p>
                         <strong>Start Time:</strong>{' '}
-                        {dayjs(meeting.start_time)
-                          .tz(userStore.userTimeZone)
-                          .format('HH:mm')}
+                        {dayjs(meeting.start_time).format('HH:mm')}
                       </p>
                       <p>
                         <strong>End Time:</strong>{' '}
-                        {dayjs(meeting.end_time)
-                          .tz(userStore.userTimeZone)
-                          .format('HH:mm')}
+                        {dayjs(meeting.end_time).format('HH:mm')}
                       </p>
                       {timeSlotStore.meetingStatus === 'completed' ? (
                         <div>

@@ -55,6 +55,7 @@ const UserSelector = ({ data, handleSubmit }) => {
   };
 
   const fetchAvailableMeetingStudents = async () => {
+    console.log('fetch all meetings for students in userselector');
     try {
       const availableMeetings: AvailableMeetingsStudents[] =
         (await getAllAvailableMeetingsForStudents()) || [];
@@ -101,6 +102,7 @@ const UserSelector = ({ data, handleSubmit }) => {
     if (userStore.currentRole === 'coach') {
       fetchAllMeetingsForCoach();
     } else if (userStore.currentRole === 'student') {
+      studentStore.resetStudentUI();
       fetchAvailableMeetingStudents();
     }
 

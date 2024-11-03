@@ -380,6 +380,60 @@ const availableMeetingForStudents = async (req, res) => {
   }
 };
 
+const getBookedMeetingsForStudent = async (req, res) => {
+  const { userId, timezone } = req.params;
+
+  try {
+    const rawQuery = `
+      SELECT
+        tsc.id AS tsc_id,
+        tsc.coach_id,
+        tsc.participants,
+        ts.id AS time_slot_id,
+        ts.start_time,
+        ts.end_time,
+        c.name AS coach_name,
+        c.phone AS coach_phone
+      FROM
+        time_slot_coaches tsc
+      JOIN
+        time_slots ts ON tsc.time_slot_id = ts.id
+      LEFT JOIN
+        students s ON tsc.participants = s.id
+      LEFT JOIN
+        coaches c ON tsc.coach_id = c.id
+      WHERE
+        tsc.participants = ? AND ts.start_time > NOW() AND tsc.status = 'booked'
+      ORDER BY
+        ts.start_time ASC
+    `;
+
+    const bookedMeetings = await sequelize.query(rawQuery, {
+      replacements: [userId],
+      type: Sequelize.QueryTypes.SELECT,
+    });
+
+    console.log('booked meetings', bookedMeetings);
+
+    const alteredTimes = bookedMeetings.map((slot) => {
+      const startTimeUTC = moment.utc(slot.start_time);
+      const endTimeUTC = moment.utc(slot.end_time);
+
+      return {
+        ...slot,
+        start_time: startTimeUTC.tz(timezone).format(),
+        end_time: endTimeUTC.tz(timezone).format(),
+      };
+    });
+
+    console.log(alteredTimes);
+    res.status(201).json(alteredTimes);
+  } catch (error) {
+    console.error('Error retrieving booked meetings for this student', error);
+    res.status(400).json({ message: 'Error retrieving booked meetings' });
+  }
+};
+
 const validateBookingData = async (req, res) => {
   console.log('REQ BODY', req.body);
 
@@ -495,5 +549,6 @@ export {
   getPastMeetingsForCoach,
   submitReview,
   availableMeetingForStudents,
+  getBookedMeetingsForStudent,
   validateBookingData,
 };

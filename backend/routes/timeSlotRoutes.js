@@ -6,6 +6,7 @@ import {
   getPastMeetingsForCoach,
   validateBookingData,
   submitReview,
+  getBookedMeetingsForStudent,
 } from '../controllers/timeSlotController.js';
 
 const router = express.Router();
@@ -23,6 +24,8 @@ router.get('/:coachId/:timezone/allmeetings', getAllMeetingsForCoach);
 router.get(`/:coachId/:timezone/pastmeetings`, getPastMeetingsForCoach);
 
 router.get('/available', availableMeetingForStudents);
+
+router.get('/:userId/:timezone/upcoming', getBookedMeetingsForStudent);
 
 router.patch('/book', validateBookingData);
 

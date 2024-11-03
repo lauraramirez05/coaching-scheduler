@@ -3,7 +3,11 @@ import { StoreContext } from '../stores/StoreContext';
 import { useContext, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import timeSlotStore from '../stores/timeSlotStore';
-import { getPastMeetingsForCoach } from '../services/timeSlotServices';
+import {
+  getBookedMeetingsForStudent,
+  getPastMeetingsForCoach,
+  getAllAvailableMeetingsForStudents,
+} from '../services/timeSlotServices';
 
 const MeetingFilterModal = observer(() => {
   const { userStore, coachStore, studentStore } = useContext(StoreContext);
@@ -33,6 +37,33 @@ const MeetingFilterModal = observer(() => {
         };
 
         fetchPastMeetings();
+      }
+    } else if (userStore.currentRole === 'student' && userStore.currentUser) {
+      if (timeSlotStore.meetingStatus === 'booked') {
+        const fetchBookedMeetings = async () => {
+          const bookedMeetings = await getBookedMeetingsForStudent(
+            userStore.currentUser.id,
+            userStore.userTimeZone
+          );
+
+          studentStore.setDisplayedMeetings(bookedMeetings);
+        };
+
+        fetchBookedMeetings();
+      } else if (timeSlotStore.meetingStatus === 'available') {
+        console.log('fetch all meetings for students in filteringModal');
+        const fetchAvailableMeetingsForStudents = async () => {
+          const allAvailableMeetingsForStudents =
+            await getAllAvailableMeetingsForStudents();
+
+          console.log(Object.values(allAvailableMeetingsForStudents));
+          studentStore.setAvailableMeetings(
+            Object.values(allAvailableMeetingsForStudents)
+          );
+          console.log(studentStore.displayedMeetings);
+        };
+
+        fetchAvailableMeetingsForStudents();
       }
     }
   }, [timeSlotStore.meetingStatus]);

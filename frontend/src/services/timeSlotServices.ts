@@ -103,8 +103,8 @@ export const getAllMeetingsForCoach = async (
     if (!response.ok) {
       throw new Error('Failed to retrieve upcoming meetings');
     }
-
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error('Failure to retrieve upcoming meetings');
     return [];
@@ -173,6 +173,28 @@ export const getAllAvailableMeetingsForStudents = async (
     return data;
   } catch (error) {
     console.error('Error fetching available meetings:', error);
+  }
+};
+
+export const getBookedMeetingsForStudent = async (
+  userId: string,
+  timezone: string
+) => {
+  const encodedTimezone = encodeURIComponent(timezone);
+
+  try {
+    const response = await fetch(
+      `${url}/api/timeSlots/${userId}/${encodedTimezone}/upcoming`
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to retrieve upcoming meetings for student');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Failure to retrieve upcoming meetings for student');
+    return [];
   }
 };
 

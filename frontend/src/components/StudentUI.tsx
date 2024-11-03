@@ -18,6 +18,9 @@ import {
   bookTimeSlot,
   getAllAvailableMeetingsForStudents,
 } from '../services/timeSlotServices';
+import MeetingFilterModal from './MeetingFilterModal';
+import timeSlotStore from '../stores/timeSlotStore';
+import { formatPhoneNumber } from '../services/formatPhoneNumber';
 
 const StudentUI = observer(() => {
   const { studentStore, userStore, coachStore } = useContext(StoreContext);
@@ -117,6 +120,7 @@ const StudentUI = observer(() => {
         alert(result.message);
 
         const fetchAvailableMeetings = async () => {
+          console.log('fetch all meetings for students in StudentUI');
           try {
             const availableMeetings: AvailableMeetingsStudents[] =
               (await getAllAvailableMeetingsForStudents()) || [];
@@ -149,23 +153,27 @@ const StudentUI = observer(() => {
       <div className='flex justify-between'>
         <Calendar meetings={[]} />
         <div>
-          <div className='flex justify-between'>
-            {userStore.currentUser &&
-              coachStore.coaches &&
-              coachStore.coaches.map((coach) => {
-                const [firstName, lastName] = coach.name.split(' ');
-                const lastInitial = lastName ? lastName.charAt(0) : ''; // Get the first letter of the last name
+          <MeetingFilterModal />
+          {timeSlotStore.meetingStatus === 'available'}{' '}
+          {
+            <div className='flex justify-between'>
+              {userStore.currentUser &&
+                coachStore.coaches &&
+                coachStore.coaches.map((coach) => {
+                  const [firstName, lastName] = coach.name.split(' ');
+                  const lastInitial = lastName ? lastName.charAt(0) : ''; // Get the first letter of the last name
 
-                return (
-                  <Checkbox
-                    key={coach.id}
-                    label={`${firstName} ${lastInitial}.`}
-                    checked={studentStore.filteredCoaches[coach.id] === true}
-                    onClick={() => handleCoachFiltering(coach.id)}
-                  />
-                );
-              })}
-          </div>
+                  return (
+                    <Checkbox
+                      key={coach.id}
+                      label={`${firstName} ${lastInitial}.`}
+                      checked={studentStore.filteredCoaches[coach.id] === true}
+                      onClick={() => handleCoachFiltering(coach.id)}
+                    />
+                  );
+                })}
+            </div>
+          }
           {studentStore.displayedMeetings.map((meeting) => {
             return (
               <Card
@@ -176,12 +184,78 @@ const StudentUI = observer(() => {
                     : ''
                 }`}
               >
-                <div>
-                  <p>
-                    <strong>Date:</strong>{' '}
-                    {dayjs(meeting.start_time).format('dddd, MMMM D, YYYY')}
-                  </p>
+                {timeSlotStore.meetingStatus === 'available' ? (
                   <div>
+                    <p>
+                      <strong>Date:</strong>{' '}
+                      {dayjs(meeting.start_time).format('dddd, MMMM D, YYYY')}
+                    </p>
+                    <div>
+                      <p>
+                        <strong>Start Time:</strong>{' '}
+                        {dayjs(meeting.start_time)
+                          .tz(userStore.userTimeZone)
+                          .format('HH:mm')}
+                      </p>
+                      <p>
+                        <strong>End Time:</strong>{' '}
+                        {dayjs(meeting.end_time)
+                          .tz(userStore.userTimeZone)
+                          .format('HH:mm')}
+                      </p>
+                      <div className='flex justify-center'>
+                        {meeting.coaches &&
+                          meeting.coaches.map((coach) => {
+                            const [firstName, lastName] = coach.name.split(' ');
+                            const firstInitial = firstName.charAt(0);
+                            const lastInitial = lastName
+                              ? lastName.charAt(0)
+                              : '';
+
+                            const isSelected =
+                              studentStore.selectedCoach === coach.id &&
+                              studentStore.selectedBooking.time_slot_id ===
+                                meeting.time_slot_id;
+
+                            return (
+                              <Avatar
+                                color='cyan'
+                                radius='xl'
+                                className={`mr-2 cursor-pointer transition-transform duration-200 ${
+                                  isSelected
+                                    ? 'ring-2 ring-blue-500 scale-105'
+                                    : 'hover:ring-2 hover:ring-blue-300 hover:scale-105'
+                                }`}
+                                key={`${meeting.time_slot_id}-${coach.id}`}
+                                onClick={() =>
+                                  handleCoachSelection(
+                                    coach.id,
+                                    meeting.time_slot_id,
+                                    userStore.currentUser.id
+                                  )
+                                }
+                              >
+                                {`${firstInitial}${lastInitial}`}
+                              </Avatar>
+                            );
+                          })}
+                      </div>
+                    </div>
+                    {studentStore.errorCard === meeting.time_slot_id && (
+                      <p className='text-red-500 mt-2 text-center'>
+                        Please select a coach
+                      </p>
+                    )}
+                    <Button onClick={() => handleBooking(meeting.time_slot_id)}>
+                      Book
+                    </Button>
+                  </div>
+                ) : (
+                  <div>
+                    <p>
+                      <strong>Date:</strong>{' '}
+                      {dayjs(meeting.start_time).format('dddd, MMMM D, YYYY')}
+                    </p>
                     <p>
                       <strong>Start Time:</strong>{' '}
                       {dayjs(meeting.start_time)
@@ -194,50 +268,17 @@ const StudentUI = observer(() => {
                         .tz(userStore.userTimeZone)
                         .format('HH:mm')}
                     </p>
-                    <div className='flex justify-center'>
-                      {meeting.coaches.map((coach) => {
-                        const [firstName, lastName] = coach.name.split(' ');
-                        const firstInitial = firstName.charAt(0);
-                        const lastInitial = lastName ? lastName.charAt(0) : '';
-
-                        const isSelected =
-                          studentStore.selectedCoach === coach.id &&
-                          studentStore.selectedBooking.time_slot_id ===
-                            meeting.time_slot_id;
-
-                        return (
-                          <Avatar
-                            color='cyan'
-                            radius='xl'
-                            className={`mr-2 cursor-pointer transition-transform duration-200 ${
-                              isSelected
-                                ? 'ring-2 ring-blue-500 scale-105'
-                                : 'hover:ring-2 hover:ring-blue-300 hover:scale-105'
-                            }`}
-                            key={`${meeting.time_slot_id}-${coach.id}`}
-                            onClick={() =>
-                              handleCoachSelection(
-                                coach.id,
-                                meeting.time_slot_id,
-                                userStore.currentUser.id
-                              )
-                            }
-                          >
-                            {`${firstInitial}${lastInitial}`}
-                          </Avatar>
-                        );
-                      })}
+                    <div>
+                      <p>
+                        <strong>Coach Name:</strong> {meeting.coach_name}
+                      </p>
+                      <p>
+                        <strong>Coach Phone:</strong>{' '}
+                        {formatPhoneNumber(meeting.coach_phone)}
+                      </p>
                     </div>
                   </div>
-                  {studentStore.errorCard === meeting.time_slot_id && (
-                    <p className='text-red-500 mt-2 text-center'>
-                      Please select a coach
-                    </p>
-                  )}
-                  <Button onClick={() => handleBooking(meeting.time_slot_id)}>
-                    Book
-                  </Button>
-                </div>
+                )}
               </Card>
             );
           })}
