@@ -28,8 +28,6 @@ const Calendar: React.FC<CalendarProps> = ({ meetings }) => {
 
   const eventMeetings: EventMeetingsType[] = [];
 
-  console.log('meetings', meetings);
-
   if (meetings !== undefined) {
     meetings.forEach((meet) => {
       eventMeetings.push({
@@ -42,8 +40,6 @@ const Calendar: React.FC<CalendarProps> = ({ meetings }) => {
       });
     });
   }
-
-  console.log('Event', eventMeetings);
 
   return (
     <div className='w-[800px] h-auto mx-auto p-0'>

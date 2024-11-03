@@ -2,8 +2,10 @@ import express from 'express';
 import {
   addTimeSlot,
   availableMeetingForStudents,
-  getUpcomingMeetingsForCoach,
+  getAllMeetingsForCoach,
+  getPastMeetingsForCoach,
   validateBookingData,
+  submitReview,
 } from '../controllers/timeSlotController.js';
 
 const router = express.Router();
@@ -16,10 +18,14 @@ router.get('/', (req, res) => {
   res.status(201).json('hitting the GET end point');
 });
 
-router.get('/:coachId/:timezone/upcoming', getUpcomingMeetingsForCoach);
+router.get('/:coachId/:timezone/allmeetings', getAllMeetingsForCoach);
+
+router.get(`/:coachId/:timezone/pastmeetings`, getPastMeetingsForCoach);
 
 router.get('/available', availableMeetingForStudents);
 
 router.patch('/book', validateBookingData);
+
+router.patch('/review', submitReview);
 
 export default router;

@@ -16,8 +16,9 @@ import { getUserTimeZone } from '../services/userTimeZone';
 import {
   AvailableMeetingsStudents,
   getAllAvailableMeetingsForStudents,
-  getUpcomingMeetingsForCoach,
+  getAllMeetingsForCoach,
 } from '../services/timeSlotServices';
+import timeSlotStore from '../stores/timeSlotStore';
 
 const UserSelector = ({ data, handleSubmit }) => {
   const [opened, { open, close }] = useDisclosure(false);
@@ -27,16 +28,25 @@ const UserSelector = ({ data, handleSubmit }) => {
     onDropdownClose: () => combobox.resetSelectedOption(),
   });
 
-  const fetchUpcomingMeetingsCoaches = async () => {
-    console.log('fetching');
+  const fetchAllMeetingsForCoach = async () => {
     if (userStore.currentRole === 'coach') {
       if (userStore.currentUser) {
         try {
-          const result = await getUpcomingMeetingsForCoach(
+          const result = await getAllMeetingsForCoach(
             userStore.currentUser.id,
             userStore.userTimeZone
           );
-          coachStore.setUpcomingMeetings(result);
+
+          coachStore.setAllCoachMeetings(result);
+
+          if (timeSlotStore.meetingStatus === 'available') {
+            const availableSlots = coachStore.allCoachMeetings.filter(
+              (slot) => {
+                return slot.status === 'available';
+              }
+            );
+            coachStore.setDisplayedMeetings(availableSlots);
+          }
         } catch (error) {
           console.error('Error fetching upcoming meetings:', error);
         }
@@ -44,14 +54,14 @@ const UserSelector = ({ data, handleSubmit }) => {
     }
   };
 
-  const fetchAvailableMeetings = async () => {
+  const fetchAvailableMeetingStudents = async () => {
     try {
       const availableMeetings: AvailableMeetingsStudents[] =
         (await getAllAvailableMeetingsForStudents()) || [];
       studentStore.setAvailableMeetings(Object.values(availableMeetings));
     } catch (error) {
       console.error(
-        `Error is ${fetchAvailableMeetings}, couldn't get the meetings`,
+        `Error in 'fetchAvailableMeetingStudents', couldn't get the meetings`,
         error
       );
     }
@@ -89,10 +99,12 @@ const UserSelector = ({ data, handleSubmit }) => {
     getUserTimeZone();
 
     if (userStore.currentRole === 'coach') {
-      fetchUpcomingMeetingsCoaches();
+      fetchAllMeetingsForCoach();
     } else if (userStore.currentRole === 'student') {
-      fetchAvailableMeetings();
+      fetchAvailableMeetingStudents();
     }
+
+    timeSlotStore.setMeetingStatus('available');
 
     combobox.closeDropdown();
   };

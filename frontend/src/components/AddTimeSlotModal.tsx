@@ -75,7 +75,6 @@ const AddTimeSlotModal = ({ opened, onClose }: AddTimeSlotModalProps) => {
     if (isSelected) {
       timeSlotStore.updateSelectedDays(date);
     } else if (timeSlotStore.selectedDays.length < 4) {
-      console.log('adding day');
       timeSlotStore.setSelectedDays(date);
     }
   };
@@ -103,24 +102,17 @@ const AddTimeSlotModal = ({ opened, onClose }: AddTimeSlotModalProps) => {
 
   const getDisabledTime: RangeDisabledTime = (now, type) => {
     const isToday = dayjs().isSame(now, 'day');
-    // console.log(isToday);
 
     const disabledHours = [];
     if (isToday) {
       disabledHours.push(...Array.from({ length: now.hour() }, (_, i) => i));
     }
 
-    // console.log('today hours', disabledHours);
-
     const commonDisabledHoursStart = [
       ...Array.from({ length: 8 }, (_, i) => i), // Before 8 AM
       ...Array.from({ length: 7 }, (_, i) => i + 19), // After 6 PM
     ];
 
-    // console.log('after filtering', commonDisabledHoursStart);
-
-    // console.log('common disable hours', disabledHours);
-    // console.log('Start hours', commonDisabledHoursStart);
     const commonDisabledHoursEnd = [
       ...Array.from({ length: 10 }, (_, i) => i),
       ...Array.from({ length: 9 }, (_, i) => i + 21),
@@ -154,13 +146,11 @@ const AddTimeSlotModal = ({ opened, onClose }: AddTimeSlotModalProps) => {
       });
       const approvedTimeSlots = response.createdLinks;
       approvedTimeSlots.forEach((slot) => {
-        coachStore.refreshUpcomingMeetings(slot);
+        coachStore.refreshMeetings(slot);
       });
-      console.log(response);
 
       if (response.errors && response.errors.length > 0) {
         const errorMessages = response.errors.map((err) => err).join('\n');
-        console.log(errorMessages);
         alert(errorMessages);
       }
 

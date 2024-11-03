@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { StoreContext } from '../stores/StoreContext';
 import dayjs from 'dayjs';
 import { Card } from 'antd';
-import { Button } from '@mantine/core';
+import { Button, Rating } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import AddTimeSlotModal from './AddTimeSlotModal';
 import '@mantine/dates/styles.css';
@@ -15,10 +15,18 @@ import {
 } from '../services/coachServices';
 import UserSelector from './UserSelector';
 import Calendar from './Calendar';
+import MeetingFilterModal from './MeetingFilterModal';
+import ReviewModal from './ReviewModal';
+import { formatPhoneNumber } from '../services/formatPhoneNumber';
 
 const CoachUI = observer(() => {
-  const [opened, { open, close }] = useDisclosure(false);
-  const { coachStore, userStore } = useContext(StoreContext);
+  const [
+    isAddTimeSlotOpen,
+    { open: openAddTimeSlot, close: closeAddTimeSlot },
+  ] = useDisclosure(false);
+  const [isReviewOpen, { open: openReview, close: closeReview }] =
+    useDisclosure(false);
+  const { coachStore, userStore, timeSlotStore } = useContext(StoreContext);
 
   useEffect(() => {
     const fetchCoaches = async () => {
@@ -50,6 +58,11 @@ const CoachUI = observer(() => {
     }
   };
 
+  const handleReviewClick = (meeting) => {
+    openReview();
+    timeSlotStore.setTimeSlotUnderReview(meeting);
+  };
+
   return (
     <div>
       <div>
@@ -57,48 +70,81 @@ const CoachUI = observer(() => {
       </div>
       <div className='flex justify-start w-full gap-4 p-1.5'>
         <div>
-          <Calendar meetings={coachStore.upcomingMeetings} />
+          <Calendar meetings={coachStore.displayedMeetings} />
         </div>
         {userStore.currentUser && userStore.currentUser !== 'create-new' ? (
           <div className='w-full flex flex-col justify-start'>
             <div>
-              <Button onClick={open}>Add Time Slot</Button>
+              <Button onClick={openAddTimeSlot}>Add Time Slot</Button>
             </div>
+            <MeetingFilterModal />
             <div>
-              {coachStore.upcomingMeetings.map((meeting) => (
-                <Card
-                  key={meeting.tsc_id}
-                  title='Meeting Info'
-                  className='flex flex-col'
-                >
-                  <div>
-                    <p>
-                      <strong>Date:</strong>{' '}
-                      {dayjs(meeting.start_time).format('dddd, MMMM D, YYYY')}
-                    </p>
-                  </div>
-                  <div>
-                    <p>
-                      <strong>Start Time:</strong>{' '}
-                      {dayjs(meeting.start_time)
-                        .tz(userStore.userTimeZone)
-                        .format('HH:mm')}
-                    </p>
-                    <p>
-                      <strong>End Time:</strong>{' '}
-                      {dayjs(meeting.end_time)
-                        .tz(userStore.userTimeZone)
-                        .format('HH:mm')}
-                    </p>
-                    <p>
-                      <strong>Status:</strong>{' '}
-                      {meeting.status
-                        ? meeting.status
-                        : meeting.dataValues.status}
-                    </p>
-                  </div>
-                </Card>
-              ))}
+              {coachStore.displayedMeetings.length === 0 ? (
+                <p>There are no {timeSlotStore.meetingStatus} slots</p>
+              ) : (
+                coachStore.displayedMeetings.map((meeting) => (
+                  <Card
+                    key={meeting.tsc_id}
+                    title='Meeting Info'
+                    className='flex flex-col'
+                  >
+                    <div>
+                      <p>
+                        <strong>Date:</strong>{' '}
+                        {dayjs(meeting.start_time).format('dddd, MMMM D, YYYY')}
+                      </p>
+                    </div>
+                    <div>
+                      <p>
+                        <strong>Start Time:</strong>{' '}
+                        {dayjs(meeting.start_time)
+                          .tz(userStore.userTimeZone)
+                          .format('HH:mm')}
+                      </p>
+                      <p>
+                        <strong>End Time:</strong>{' '}
+                        {dayjs(meeting.end_time)
+                          .tz(userStore.userTimeZone)
+                          .format('HH:mm')}
+                      </p>
+                      {timeSlotStore.meetingStatus === 'completed' ? (
+                        <div>
+                          <p>
+                            {meeting.student_name ? meeting.student_name : ''}
+                          </p>
+                          <Rating
+                            defaultValue={meeting.rating ? meeting.rating : 0}
+                            readOnly
+                          />
+                          <p>{meeting.notes ? meeting.notes : ''}</p>
+
+                          <Button onClick={() => handleReviewClick(meeting)}>
+                            Review
+                          </Button>
+                        </div>
+                      ) : timeSlotStore.meetingStatus === 'booked' ? (
+                        <div className='flex justify-between'>
+                          <div>
+                            {meeting.student_name ? meeting.student_name : ''}
+                          </div>
+                          <div>
+                            {meeting.student_phone
+                              ? formatPhoneNumber(meeting.student_phone)
+                              : ''}
+                          </div>
+                        </div>
+                      ) : (
+                        <p>
+                          <strong>Status:</strong>{' '}
+                          {meeting.status
+                            ? meeting.status
+                            : meeting.dataValues.status}
+                        </p>
+                      )}
+                    </div>
+                  </Card>
+                ))
+              )}
             </div>
           </div>
         ) : (
@@ -107,7 +153,8 @@ const CoachUI = observer(() => {
           </div>
         )}
       </div>
-      <AddTimeSlotModal opened={opened} onClose={close} />
+      <AddTimeSlotModal opened={isAddTimeSlotOpen} onClose={closeAddTimeSlot} />
+      <ReviewModal opened={isReviewOpen} onClose={closeReview} />
     </div>
   );
 });

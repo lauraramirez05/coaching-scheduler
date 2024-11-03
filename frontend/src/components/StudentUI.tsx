@@ -32,16 +32,6 @@ const StudentUI = observer(() => {
       }
     };
 
-    // const fetchAvailableMeetings = async () => {
-    //   try {
-    //     const allAvailableMeetings =
-    //       (await getAllAvailableMeetingsForStudents()) || [];
-    //     studentStore.setDisplayedMeetings(allAvailableMeetings);
-    //   } catch (error) {
-    //     console.error('Error fetch all available meetings', error);
-    //   }
-    // };
-
     fetchStudents();
     // fetchAvailableMeetings();
     // getAllCoaches();
@@ -67,13 +57,9 @@ const StudentUI = observer(() => {
   const handleCoachFiltering = (coachId: string) => {
     studentStore.setFilteredCoaches(coachId);
 
-    console.log('USER', userStore.currentUser);
-
     const filteredMeetings = studentStore.availableMeetings.filter(
       (meeting) => {
-        console.log('meeting', meeting);
         return meeting.coaches.some((meetingCoach) => {
-          console.log(meetingCoach);
           return studentStore.filteredCoaches[meetingCoach.id];
         });
       }
@@ -124,12 +110,10 @@ const StudentUI = observer(() => {
       return;
     } else {
       const result = await bookTimeSlot(studentStore.selectedBooking);
-      console.log('RESULT', result);
 
       if (result.status === 'success') {
         studentStore.setConfirmedBooking(result);
 
-        console.log(studentStore.confirmedBooking);
         alert(result.message);
 
         const fetchAvailableMeetings = async () => {
@@ -146,13 +130,6 @@ const StudentUI = observer(() => {
         };
 
         fetchAvailableMeetings();
-
-        // const allAvailableMeetings = await getAllAvailableMeetingsForStudents();
-
-        // studentStore.setAvailableMeetings(Object.values(allAvailableMeetings));
-        // console.log('after booking', studentStore.availableMeetings);
-
-        // console.log('All available meetings', allAvailableMeetings);
 
         studentStore.resetStudentUI();
       } else if (result.status === 'error') {

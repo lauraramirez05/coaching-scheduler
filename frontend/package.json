@@ -21,6 +21,7 @@
     "@mantine/core": "^7.13.4",
     "@mantine/dates": "^7.13.4",
     "@mantine/hooks": "^7.13.4",
+    "@mantine/notifications": "^7.13.4",
     "antd": "^5.21.6",
     "dayjs": "^1.11.13",
     "lodash.debounce": "^4.0.8",

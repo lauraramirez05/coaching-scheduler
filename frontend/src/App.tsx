@@ -13,7 +13,6 @@ const App = observer(() => {
   const { userStore } = useContext(StoreContext);
 
   getUserTimeZone();
-  console.log('student timezone', userStore.userTimeZone);
 
   return (
     <StoreContext.Provider value={rootStore}>

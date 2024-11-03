@@ -13,7 +13,6 @@ class UserStore {
   }
 
   toggleRole(value: string) {
-    console.log(value);
     this.currentRole = value;
   }
 

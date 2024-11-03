@@ -8,9 +8,7 @@ class UiStore {
   }
 
   toggleRole(value: string) {
-    console.log(value);
     this.role = value;
-    console.log(this.role);
   }
 }
 

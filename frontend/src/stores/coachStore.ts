@@ -2,13 +2,13 @@ import { makeAutoObservable } from 'mobx';
 import { CoachResponse } from '../services/coachServices';
 import {
   TimeSlotCoach,
-  UpcomingMeetingsResponse,
 } from '../services/timeSlotServices';
 
 class CoachStore {
   coaches: CoachResponse[] = [];
   currentCoach = {};
-  upcomingMeetings: TimeSlotCoach[] = [];
+  allCoachMeetings: TimeSlotCoach[] = [];
+  displayedMeetings: TimeSlotCoach[] = [];
 
   constructor() {
     makeAutoObservable(this);
@@ -22,22 +22,29 @@ class CoachStore {
     this.coaches = [...this.coaches, value];
   }
 
-  setUpcomingMeetings(value: TimeSlotCoach[]) {
-    this.upcomingMeetings = value;
-    console.log(this.upcomingMeetings);
+  setAllCoachMeetings(value: TimeSlotCoach[]) {
+    this.allCoachMeetings = value;
   }
 
-  refreshUpcomingMeetings(value) {
-    this.upcomingMeetings.push(value);
-    this.upcomingMeetings.sort(
+  setDisplayedMeetings(value: TimeSlotCoach[]) {
+    this.displayedMeetings = value;
+  }
+
+  refreshMeetings(value) {
+    this.displayedMeetings.push(value);
+    this.displayedMeetings.sort(
+      (a, b) => new Date(a.start_time) - new Date(b.start_time)
+    );
+
+    this.allCoachMeetings.push(value);
+    this.allCoachMeetings.sort(
       (a, b) => new Date(a.start_time) - new Date(b.start_time)
     );
   }
 
   resetCoachUI() {
-    console.log('hey');
     this.currentCoach = {};
-    this.setUpcomingMeetings([]);
+    this.setDisplayedMeetings([]);
   }
 }
 

@@ -1,11 +1,19 @@
 import { makeAutoObservable } from 'mobx';
 import dayjs, { Dayjs } from 'dayjs';
-import { TimeSlot } from '../services/timeSlotServices';
+import { TimeSlot, TimeSlotCoach } from '../services/timeSlotServices';
 
 class TimeSlotStore {
   selectedDays: Dayjs[] = [];
   timeSlots: { [key: string]: TimeSlot } = {};
-  // calendarEvents = [];
+  meetingStatus: string = 'available';
+  timeSlotUnderReview: TimeSlotCoach = {
+    tsc_id: '',
+    time_slot_id: '',
+    coach_id: '',
+    status: 'completed',
+    start_time: 'string',
+    end_time: '',
+  };
 
   constructor() {
     makeAutoObservable(this);
@@ -13,7 +21,6 @@ class TimeSlotStore {
 
   setSelectedDays(day: Date | Dayjs) {
     this.selectedDays.push(day);
-    console.log(this.selectedDays);
 
     const dateStr = dayjs(day).format('YYYY-MM-DD');
     if (!this.timeSlots[dateStr]) {
@@ -27,26 +34,21 @@ class TimeSlotStore {
 
   updateSelectedDays(removedDay: Date) {
     const dateStr = dayjs(removedDay).format('YYYY-MM-DD');
-    console.log('removed date string', dateStr);
     this.selectedDays = this.selectedDays.filter(
       (day) => dayjs(day).format('YYYY-MM-DD') !== dateStr
     );
 
-    console.log('Selected days', this.selectedDays);
-
-    delete this.timeSlots[dateStr]; // Remove the slot associated with the removed day
-    console.log('time slots', this.timeSlots);
+    delete this.timeSlots[dateStr];
   }
 
   updateTimeSlots(date: Dayjs, startTime: string, endTime: string) {
-    console.log('day', startTime);
     const dateStr = dayjs(date).format('YYYY-MM-DD');
     const slot = this.timeSlots[dateStr];
 
     if (slot && startTime !== '') {
       slot.startTime = startTime;
       const time = dayjs(startTime);
-      slot.endTime = time.add(2, 'hour').format('YYYY-MM-DDTHH:mm:ssZ'); // Format as needed
+      slot.endTime = time.add(2, 'hour').format('YYYY-MM-DDTHH:mm:ssZ');
     } else if (slot && endTime !== '') {
       slot.endTime = endTime;
     }
@@ -64,9 +66,39 @@ class TimeSlotStore {
     }
   }
 
+  setMeetingStatus(status: string) {
+    this.meetingStatus = status;
+  }
+
+  setTimeSlotUnderReview(meeting: TimeSlotCoach) {
+    this.timeSlotUnderReview = meeting;
+    console.log('Time Slot under review', this.timeSlotUnderReview);
+  }
+
+  updateRating(newRating: number) {
+    this.timeSlotUnderReview.rating = newRating;
+
+    console.log('New rating', this.timeSlotUnderReview);
+  }
+
+  updateNotes(newNotes: string) {
+    this.timeSlotUnderReview.notes = newNotes;
+  }
+
   resetSelectedDays() {
     this.selectedDays = [];
     this.timeSlots = {};
+  }
+
+  resetTimeSlotUnderReview() {
+    this.timeSlotUnderReview = {
+      tsc_id: '',
+      time_slot_id: '',
+      coach_id: '',
+      status: 'completed',
+      start_time: 'string',
+      end_time: '',
+    };
   }
 
   // setCalendarEvents(value: {}) {

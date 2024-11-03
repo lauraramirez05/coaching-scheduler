@@ -61,8 +61,6 @@ class StudentStore {
       time_slot_id: timeSlotId,
       user_id: userId,
     };
-
-    console.log('booking', this.selectedBooking);
   }
 
   setFilteredCoaches(coachId: string) {
@@ -82,7 +80,6 @@ class StudentStore {
 
   setErrorCard(timeSlotId: string) {
     this.errorCard = timeSlotId;
-    console.log(this.errorCard);
   }
 
   setConfirmedBooking(booking: BookTimeSlotResponse) {

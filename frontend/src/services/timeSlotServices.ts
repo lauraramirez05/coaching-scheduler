@@ -25,7 +25,9 @@ export interface TimeSlotCoach {
   end_time: string;
   participants?: string; // Optional
   rating?: number; // Optional
-  notes?: string; // Optional
+  notes?: string;
+  student_name?: string;
+  student_phone?: string;
 }
 
 interface coaches {
@@ -65,14 +67,11 @@ interface BookTimeSlotError {
   message: string;
 }
 
-export type UpcomingMeetingsResponse = TimeSlotCoach[];
-
 export type BookTimeSlotResponse = BookTimeSlotSuccess | BookTimeSlotError;
 
 const url = 'http://localhost:5001';
 
 export const createTimeSlots = async (schedule: CoachSchedule) => {
-  console.log('SCHEDULE', schedule);
   try {
     const response = await fetch(`${url}/api/timeSlots`, {
       method: 'POST',
@@ -91,14 +90,14 @@ export const createTimeSlots = async (schedule: CoachSchedule) => {
   }
 };
 
-export const getUpcomingMeetingsForCoach = async (
+export const getAllMeetingsForCoach = async (
   coachId: string,
   timezone: string
-): Promise<UpcomingMeetingsResponse | void> => {
+): Promise<TimeSlotCoach[]> => {
   const encodedTimezone = encodeURIComponent(timezone);
   try {
     const response = await fetch(
-      `${url}/api/timeSlots/${coachId}/${encodedTimezone}/upcoming`
+      `${url}/api/timeSlots/${coachId}/${encodedTimezone}/allmeetings`
     );
 
     if (!response.ok) {
@@ -108,6 +107,54 @@ export const getUpcomingMeetingsForCoach = async (
     return await response.json();
   } catch (error) {
     console.error('Failure to retrieve upcoming meetings');
+    return [];
+  }
+};
+
+export const getPastMeetingsForCoach = async (
+  coachId: string,
+  timezone: string
+): Promise<TimeSlotCoach[]> => {
+  const encodedTimezone = encodeURIComponent(timezone);
+
+  try {
+    const response = await fetch(
+      `${url}/api/timeSlots/${coachId}/${encodedTimezone}/pastmeetings`
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to retrieve past meetings');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Failure to retrieve past meetings');
+    return [];
+  }
+};
+
+export const submitReview = async (
+  reviewDetails: TimeSlotCoach
+): Promise<TimeSlotCoach | {}> => {
+  try {
+    const response = await fetch(`${url}/api/timeSlots/review`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tsc_id: reviewDetails.tsc_id,
+        rating: reviewDetails.rating,
+        notes: reviewDetails.notes,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to submit review');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to submit review');
+    return {};
   }
 };
 
@@ -120,7 +167,6 @@ export const getAllAvailableMeetingsForStudents = async (
       coaches.forEach((coach) => newUrl.searchParams.append('coaches', coach));
     }
 
-    console.log('URL', newUrl);
     const response = await fetch(newUrl);
     const data = await response.json();
 

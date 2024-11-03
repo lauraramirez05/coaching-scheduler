@@ -147,7 +147,7 @@ const addTimeSlot = async (req, res) => {
 };
 
 //Upcoming Meetings
-const getUpcomingMeetingsForCoach = async (req, res) => {
+const getAllMeetingsForCoach = async (req, res) => {
   const { coachId, timezone } = req.params;
 
   try {
@@ -158,11 +158,15 @@ const getUpcomingMeetingsForCoach = async (req, res) => {
         tsc.status,
         ts.id AS time_slot_id,
         ts.start_time,
-        ts.end_time
+        ts.end_time,
+        s.name AS student_name,
+        s.phone AS student_phone
       FROM
         time_slot_coaches tsc
       JOIN
         time_slots ts ON tsc.time_slot_id = ts.id
+      LEFT JOIN
+        students s ON tsc.participants = s.id
       WHERE
         tsc.coach_id = ? AND ts.start_time > NOW()
       ORDER BY
@@ -173,6 +177,8 @@ const getUpcomingMeetingsForCoach = async (req, res) => {
       replacements: [coachId],
       type: Sequelize.QueryTypes.SELECT,
     });
+
+    console.log(results);
 
     const alteredTimes = results.map((slot) => {
       const startTimeUTC = moment.utc(slot.start_time);
@@ -192,6 +198,96 @@ const getUpcomingMeetingsForCoach = async (req, res) => {
   } catch (error) {
     console.error('Error retrieving upcoming meetings:', error);
     res.status(400).json({ message: 'Error retrieving upcoming meetings' });
+  }
+};
+
+const getPastMeetingsForCoach = async (req, res) => {
+  const { coachId, timezone } = req.params;
+
+  try {
+    const rawQuery = `
+    SELECT
+        tsc.id AS tsc_id,
+        tsc.coach_id,
+        tsc.status,
+        tsc.rating,
+        tsc.notes,
+        participants,
+        ts.id AS time_slot_id,
+        ts.start_time,
+        ts.end_time,
+        s.name AS student_name
+      FROM
+        time_slot_coaches tsc
+      JOIN
+        time_slots ts ON tsc.time_slot_id = ts.id
+      LEFT JOIN
+        students s ON tsc.participants = s.id
+      WHERE
+        tsc.coach_id = ? AND ts.start_time < NOW() AND tsc.participants IS NOT NULL
+      ORDER BY
+        ts.start_time ASC
+    `;
+
+    const pastMeetings = await sequelize.query(rawQuery, {
+      replacements: [coachId],
+      type: Sequelize.QueryTypes.SELECT,
+    });
+
+    for (const meeting of pastMeetings) {
+      await sequelize.query(
+        `UPDATE time_slot_coaches SET status = 'completed' WHERE id = ?`,
+        {
+          replacements: [meeting.tsc_id],
+          type: Sequelize.QueryTypes.UPDATE,
+        }
+      );
+    }
+
+    const updatedMeetings = await sequelize.query(rawQuery, {
+      replacements: [coachId],
+      type: Sequelize.QueryTypes.SELECT,
+    });
+
+    const alteredTimes = updatedMeetings.map((slot) => {
+      const startTimeUTC = moment.utc(slot.start_time);
+      const endTimeUTC = moment.utc(slot.end_time);
+
+      return {
+        ...slot,
+        start_time: startTimeUTC.tz(timezone).format(),
+        end_time: endTimeUTC.tz(timezone).format(),
+      };
+    });
+
+    console.log(alteredTimes);
+    res.status(201).json(alteredTimes);
+  } catch (error) {
+    console.error('Error retrieving past meetings', error);
+    res.status(400).json({ message: 'Error retrieving past meetings' });
+  }
+};
+
+const submitReview = async (req, res) => {
+  const { tsc_id, rating, notes } = req.body;
+  console.log(`Sumitting review`, req.body);
+
+  try {
+    const timeSlot = await TimeSlotCoaches.findOne({ where: { id: tsc_id } });
+
+    if (timeSlot) {
+      timeSlot.rating = rating;
+      timeSlot.notes = notes;
+
+      await timeSlot.save();
+      console.log('TIME SLOT', timeSlot);
+
+      res.status(201).json(timeSlot);
+    }
+  } catch (error) {
+    res
+      .status(400)
+      .json({ message: `Time Slot couldn't have been updated, try again` });
   }
 };
 
@@ -395,7 +491,9 @@ const validateBookingData = async (req, res) => {
 
 export {
   addTimeSlot,
-  getUpcomingMeetingsForCoach,
+  getAllMeetingsForCoach,
+  getPastMeetingsForCoach,
+  submitReview,
   availableMeetingForStudents,
   validateBookingData,
 };
