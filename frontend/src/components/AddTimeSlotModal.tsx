@@ -156,17 +156,18 @@ const AddTimeSlotModal = ({ opened, onClose }: AddTimeSlotModalProps) => {
       approvedTimeSlots.forEach((slot) => {
         coachStore.refreshUpcomingMeetings(slot);
       });
-      // console.log(response.createdLinks);
-      // // console.log('helliii', timeSlotStore.timeSlots);
-      // // for (const slot in response) {
-      // //   console.log(slot);
-      // //   coachStore.refreshUpcomingMeetings(slot);
-      // // }
+      console.log(response);
+
+      if (response.errors && response.errors.length > 0) {
+        console.log('hello');
+        const errorMessages = response.errors.map((err) => err).join('\n');
+        console.log(errorMessages);
+        alert(errorMessages);
+      }
+
       onClose();
 
       timeSlotStore.resetSelectedDays();
-
-      console.log(response);
     } else {
       console.error('Current user is not available.');
     }

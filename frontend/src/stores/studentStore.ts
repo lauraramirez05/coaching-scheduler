@@ -21,6 +21,7 @@ class StudentStore {
     user_id: '',
   };
   confirmedBooking: {} | null = null;
+  errorCard: string = '';
 
   constructor() {
     makeAutoObservable(this);
@@ -65,12 +66,15 @@ class StudentStore {
   }
 
   resetAfterBooking() {
-    this.availableMeetings = [];
-    this.displayedMeetings = [];
     this.filteredCoaches = {};
     this.selectedCoach = null;
     this.selectedBooking = { coach_id: '', time_slot_id: '', user_id: '' };
     this.confirmedBooking = null;
+  }
+
+  setErrorCard(timeSlotId: string) {
+    this.errorCard = timeSlotId;
+    console.log(this.errorCard);
   }
 }
 

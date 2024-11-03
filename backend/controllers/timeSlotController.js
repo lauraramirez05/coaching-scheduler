@@ -226,6 +226,7 @@ const availableMeetingForStudents = async (req, res) => {
 
       console.log(availableMeetings);
     } else {
+      console.log('here');
       availableMeetings = await sequelize.query(rawQueryAllCoaches, {
         type: Sequelize.QueryTypes.SELECT,
       });

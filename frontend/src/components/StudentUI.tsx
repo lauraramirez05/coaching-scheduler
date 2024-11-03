@@ -110,21 +110,28 @@ const StudentUI = observer(() => {
   };
 
   const handleBooking = async () => {
-    const result = await bookTimeSlot(studentStore.selectedBooking);
-    console.log(result.status);
-    console.log(result.message);
+    if (studentStore.selectedBooking.coach_id === '') {
+      console.log('here');
+      console.log('booking id', studentStore.selectedBooking.time_slot_id);
+      studentStore.setErrorCard(studentStore.selectedBooking.time_slot_id);
+    } else {
+      const result = await bookTimeSlot(studentStore.selectedBooking);
+      console.log(result.status);
+      console.log(result.message);
 
-    if (result.status === 'success') {
-      studentStore.confirmedBooking = result;
-      console.log(studentStore.confirmedBooking);
-      alert(result.message);
-      studentStore.resetAfterBooking();
+      if (result.status === 'success') {
+        studentStore.confirmedBooking = result;
+        console.log(studentStore.confirmedBooking);
+        alert(result.message);
 
-      const allAvailableMeetings = await getAllAvailableMeetingsForStudents();
+        const allAvailableMeetings = await getAllAvailableMeetingsForStudents();
 
-      studentStore.setAvailableMeetings(allAvailableMeetings);
-    } else if (result.status === 'error') {
-      alert(result.message); // Notify the user of the error
+        studentStore.setAvailableMeetings(allAvailableMeetings);
+
+        studentStore.resetAfterBooking();
+      } else if (result.status === 'error') {
+        alert(result.message); // Notify the user of the error
+      }
     }
   };
 
@@ -235,6 +242,11 @@ const StudentUI = observer(() => {
                         })}
                       </div>
                     </div>
+                    {studentStore.errorCard === meeting.time_slot_id && (
+                      <p className='text-red-500 mt-2 text-center'>
+                        Please select a coach
+                      </p>
+                    )}
                     <Button onClick={handleBooking}>Book</Button>
                   </div>
                 )}
