@@ -15,7 +15,6 @@ const router = express.Router();
 router.post('/', addTimeSlot);
 
 router.get('/', (req, res) => {
-  console.log('hitting time slot router');
   res.status(201).json('hitting the GET end point');
 });
 

@@ -24,7 +24,6 @@ const MeetingFilterModal = observer(() => {
           return slot.status === 'booked';
         });
         coachStore.setDisplayedMeetings(bookedSlots);
-        console.log('booked', coachStore.displayedMeetings);
       } else if (timeSlotStore.meetingStatus === 'completed') {
         const fetchPastMeetings = async () => {
           const pastMeetings = await getPastMeetingsForCoach(
@@ -32,7 +31,6 @@ const MeetingFilterModal = observer(() => {
             userStore.userTimeZone
           );
 
-          console.log('past meetings', pastMeetings);
           coachStore.setDisplayedMeetings(pastMeetings);
         };
 
@@ -51,16 +49,13 @@ const MeetingFilterModal = observer(() => {
 
         fetchBookedMeetings();
       } else if (timeSlotStore.meetingStatus === 'available') {
-        console.log('fetch all meetings for students in filteringModal');
         const fetchAvailableMeetingsForStudents = async () => {
           const allAvailableMeetingsForStudents =
             await getAllAvailableMeetingsForStudents();
 
-          console.log(Object.values(allAvailableMeetingsForStudents));
           studentStore.setAvailableMeetings(
             Object.values(allAvailableMeetingsForStudents)
           );
-          console.log(studentStore.displayedMeetings);
         };
 
         fetchAvailableMeetingsForStudents();

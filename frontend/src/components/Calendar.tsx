@@ -9,6 +9,7 @@ import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { StoreContext } from '../stores/StoreContext';
 import { useContext } from 'react';
+import { formatPhoneNumber } from '../services/formatPhoneNumber';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -27,6 +28,7 @@ const Calendar: React.FC<CalendarProps> = ({ meetings }) => {
   const { userStore } = useContext(StoreContext);
 
   const eventMeetings: EventMeetingsType[] = [];
+  console.log('meetings', meetings);
 
   if (meetings !== undefined) {
     meetings.forEach((meet) => {
@@ -37,9 +39,31 @@ const Calendar: React.FC<CalendarProps> = ({ meetings }) => {
         // Convert to the desired timezone if needed, e.g., 'America/New_York'
         start: dayjs(meet.start_time).tz(userStore.userTimeZone).toISOString(),
         end: dayjs(meet.end_time).tz(userStore.userTimeZone).toISOString(),
+        student_phone: `${meet.student_phone ? meet.student_phone : null}`,
+        
+        status: `${meet.status}`,
+        color: `${meet.status === 'booked' ? 'purple' : ''}`,
       });
     });
   }
+
+  const renderEventContent = (eventInfo) => {
+    // Apply different background colors based on status
+    const isAvailable =
+      eventInfo.event.extendedProps.status === 'available' ? true : false;
+    console.log(eventInfo);
+
+    return (
+      <div>
+        <b>{eventInfo.event.title && eventInfo.event.title}</b>
+        {!isAvailable && (
+          <p className='text-xs'>
+            {formatPhoneNumber(eventInfo.event.extendedProps.student_phone)}
+          </p>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className='w-[800px] h-auto mx-auto p-0'>
@@ -54,13 +78,16 @@ const Calendar: React.FC<CalendarProps> = ({ meetings }) => {
         events={eventMeetings}
         views={{
           dayGridMonth: {
-            displayEventTime: false, // Show times in monthly view
+            displayEventTime: true, // Show times in monthly view
           },
           timeGridWeek: {
             slotDuration: '01:00:00',
           },
         }}
         allDaySlot={false}
+        eventColor=''
+        eventContent={renderEventContent}
+        eventDisplay='block'
       />
     </div>
   );

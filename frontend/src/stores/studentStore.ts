@@ -18,6 +18,7 @@ interface BookingResponse {
 
 class StudentStore {
   students: StudentData[] = [];
+  allMeetings: AvailableMeetingsStudents[] = [];
   availableMeetings: AvailableMeetingsStudents[] = [];
   displayedMeetings: AvailableMeetingsStudents[] = [];
   filteredCoaches: SelectedCoachesType = {};

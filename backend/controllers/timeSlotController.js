@@ -9,8 +9,6 @@ import moment from 'moment-timezone';
 const addTimeSlot = async (req, res) => {
   const { timeSlots, coachId, timeZone } = req.body;
 
-  console.log('TIME SLOTS', timeSlots);
-
   // Validate that timeSlots is provided and is an object
   if (!timeSlots || typeof timeSlots !== 'object') {
     return res.status(400).json({ message: 'Invalid time slots data.' });
@@ -33,8 +31,6 @@ const addTimeSlot = async (req, res) => {
       continue; // Skip to the next time slot
     }
 
-    console.log('Validated that is not a past date');
-
     const businessStart = startTimeLocal.clone().set({ hour: 8, minute: 0 });
     const businessEnd = startTimeLocal.clone().set({ hour: 18, minute: 0 });
 
@@ -48,13 +44,9 @@ const addTimeSlot = async (req, res) => {
       continue; // Skip to the next time slot
     }
 
-    console.log('Validate that is whithin business hours');
-
     // Convert to UTC
     const startTimeUtc = startTimeLocal.utc().toISOString();
     const endTimeUtc = endTimeLocal.utc().toISOString();
-
-    console.log('Turn timo into UTC', [startTimeUtc, endTimeUtc]);
 
     try {
       //check for overlapping timeslot
@@ -94,13 +86,11 @@ const addTimeSlot = async (req, res) => {
 
       let timeSlotId;
       if (!existingTimeSlot) {
-        console.log(`This time slot doesn't exist`);
         const newTimeSlot = await TimeSlot.create({
           start_time: startTimeUtc,
           end_time: endTimeUtc,
         });
         timeSlotId = newTimeSlot.id;
-        console.log('new time slot created', newTimeSlot);
       } else {
         timeSlotId = existingTimeSlot.id;
       }
@@ -119,7 +109,7 @@ const addTimeSlot = async (req, res) => {
           coach_id: coachId,
           status: 'available',
         });
-        console.log('created a link with the coach', createdLink);
+
         createdLinks.push({
           ...createdLink,
           start_time: startTime,
@@ -178,14 +168,9 @@ const getAllMeetingsForCoach = async (req, res) => {
       type: Sequelize.QueryTypes.SELECT,
     });
 
-    console.log(results);
-
     const alteredTimes = results.map((slot) => {
       const startTimeUTC = moment.utc(slot.start_time);
       const endTimeUTC = moment.utc(slot.end_time);
-
-      console.log('Start time (UTC):', startTimeUTC.format());
-      console.log('End time (UTC):', endTimeUTC.format());
 
       return {
         ...slot,
@@ -260,7 +245,6 @@ const getPastMeetingsForCoach = async (req, res) => {
       };
     });
 
-    console.log(alteredTimes);
     res.status(201).json(alteredTimes);
   } catch (error) {
     console.error('Error retrieving past meetings', error);
@@ -270,7 +254,6 @@ const getPastMeetingsForCoach = async (req, res) => {
 
 const submitReview = async (req, res) => {
   const { tsc_id, rating, notes } = req.body;
-  console.log(`Sumitting review`, req.body);
 
   try {
     const timeSlot = await TimeSlotCoaches.findOne({ where: { id: tsc_id } });
@@ -280,7 +263,6 @@ const submitReview = async (req, res) => {
       timeSlot.notes = notes;
 
       await timeSlot.save();
-      console.log('TIME SLOT', timeSlot);
 
       res.status(201).json(timeSlot);
     }
@@ -294,8 +276,6 @@ const submitReview = async (req, res) => {
 //Available Meetings for students
 const availableMeetingForStudents = async (req, res) => {
   const { coaches } = req.query;
-  console.log('REQ', req.query);
-  console.log('coach id receiving query', coaches);
 
   const coachIdString = Array.isArray(coaches)
     ? coaches.map((coach) => `'${coach}'`).join(',')
@@ -349,7 +329,6 @@ const availableMeetingForStudents = async (req, res) => {
         type: sequelize.QueryTypes.SELECT,
       });
     } else {
-      console.log('here');
       availableMeetings = await sequelize.query(rawQueryAllCoaches, {
         type: Sequelize.QueryTypes.SELECT,
       });
@@ -373,7 +352,6 @@ const availableMeetingForStudents = async (req, res) => {
       }
     });
 
-    console.log(mapMeetings);
     res.status(201).json(mapMeetings);
   } catch (error) {
     console.error('Error to retrieve the available meetings', error);
@@ -389,6 +367,7 @@ const getBookedMeetingsForStudent = async (req, res) => {
         tsc.id AS tsc_id,
         tsc.coach_id,
         tsc.participants,
+        tsc.status,
         ts.id AS time_slot_id,
         ts.start_time,
         ts.end_time,
@@ -413,8 +392,6 @@ const getBookedMeetingsForStudent = async (req, res) => {
       type: Sequelize.QueryTypes.SELECT,
     });
 
-    console.log('booked meetings', bookedMeetings);
-
     const alteredTimes = bookedMeetings.map((slot) => {
       const startTimeUTC = moment.utc(slot.start_time);
       const endTimeUTC = moment.utc(slot.end_time);
@@ -426,7 +403,6 @@ const getBookedMeetingsForStudent = async (req, res) => {
       };
     });
 
-    console.log(alteredTimes);
     res.status(201).json(alteredTimes);
   } catch (error) {
     console.error('Error retrieving booked meetings for this student', error);
@@ -435,10 +411,8 @@ const getBookedMeetingsForStudent = async (req, res) => {
 };
 
 const validateBookingData = async (req, res) => {
-  console.log('REQ BODY', req.body);
-
   const { time_slot_id, coach_id, student_id } = req.body;
-  console.log('Booking details', [time_slot_id, coach_id, student_id]);
+
   // const { time_slot_id, coach_id, student_id } = bookingDetails;
 
   try {
@@ -482,10 +456,9 @@ const validateBookingData = async (req, res) => {
         .status(400)
         .json({ message: 'This time slot is already booked' });
     }
-    console.log('SLOT', timeSlot);
+
     const newStartTime = timeSlot[0].start_time;
     const newEndTime = timeSlot[0].end_time;
-    console.log('NEW TIMES', [newStartTime, newEndTime]);
 
     //check for overlapping
 
@@ -528,8 +501,6 @@ const validateBookingData = async (req, res) => {
       },
       attributes: ['phone'],
     });
-
-    console.log('PHONE COACH', coach);
 
     return res.status(200).json({
       updatedTimeSlot,

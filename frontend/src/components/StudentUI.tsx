@@ -9,7 +9,6 @@ import {
   getAllStudents,
 } from '../services/studentServices';
 import Calendar from './Calendar';
-import { getAllCoaches } from '../services/coachServices';
 import { Checkbox, Avatar, Button } from '@mantine/core';
 import { Card } from 'antd';
 import dayjs from 'dayjs';
@@ -36,8 +35,7 @@ const StudentUI = observer(() => {
     };
 
     fetchStudents();
-    // fetchAvailableMeetings();
-    // getAllCoaches();
+
   }, []);
 
   const handleSubmit = async () => {
@@ -120,7 +118,6 @@ const StudentUI = observer(() => {
         alert(result.message);
 
         const fetchAvailableMeetings = async () => {
-          console.log('fetch all meetings for students in StudentUI');
           try {
             const availableMeetings: AvailableMeetingsStudents[] =
               (await getAllAvailableMeetingsForStudents()) || [];

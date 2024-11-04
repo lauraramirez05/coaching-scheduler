@@ -40,6 +40,7 @@ export interface AvailableMeetingsStudents {
   start_time: string;
   end_time: string;
   coaches: coaches[];
+  status?: string;
 }
 
 export interface SelectedBooking {

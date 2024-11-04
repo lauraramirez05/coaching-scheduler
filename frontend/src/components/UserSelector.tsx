@@ -17,6 +17,7 @@ import {
   AvailableMeetingsStudents,
   getAllAvailableMeetingsForStudents,
   getAllMeetingsForCoach,
+  getBookedMeetingsForStudent,
 } from '../services/timeSlotServices';
 import timeSlotStore from '../stores/timeSlotStore';
 
@@ -55,10 +56,11 @@ const UserSelector = ({ data, handleSubmit }) => {
   };
 
   const fetchAvailableMeetingStudents = async () => {
-    console.log('fetch all meetings for students in userselector');
     try {
       const availableMeetings: AvailableMeetingsStudents[] =
         (await getAllAvailableMeetingsForStudents()) || [];
+      
+      // const bookedMeetings: AvailableMeetingsStudents[] = (await getBookedMeetingsForStudent())
       studentStore.setAvailableMeetings(Object.values(availableMeetings));
     } catch (error) {
       console.error(

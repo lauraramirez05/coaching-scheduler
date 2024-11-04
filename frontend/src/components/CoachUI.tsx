@@ -63,6 +63,8 @@ const CoachUI = observer(() => {
     timeSlotStore.setTimeSlotUnderReview(meeting);
   };
 
+  console.log(coachStore.allCoachMeetings);
+
   return (
     <div>
       <div>
@@ -70,7 +72,7 @@ const CoachUI = observer(() => {
       </div>
       <div className='flex justify-start w-full gap-4 p-1.5'>
         <div>
-          <Calendar meetings={coachStore.displayedMeetings} />
+          <Calendar meetings={coachStore.allCoachMeetings} />
         </div>
         {userStore.currentUser && userStore.currentUser !== 'create-new' ? (
           <div className='w-full flex flex-col justify-start'>

@@ -72,13 +72,10 @@ class TimeSlotStore {
 
   setTimeSlotUnderReview(meeting: TimeSlotCoach) {
     this.timeSlotUnderReview = meeting;
-    console.log('Time Slot under review', this.timeSlotUnderReview);
   }
 
   updateRating(newRating: number) {
     this.timeSlotUnderReview.rating = newRating;
-
-    console.log('New rating', this.timeSlotUnderReview);
   }
 
   updateNotes(newNotes: string) {
