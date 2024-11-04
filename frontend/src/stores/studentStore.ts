@@ -18,8 +18,9 @@ interface BookingResponse {
 
 class StudentStore {
   students: StudentData[] = [];
-  allMeetings: AvailableMeetingsStudents[] = [];
   availableMeetings: AvailableMeetingsStudents[] = [];
+  bookedMeetings: AvailableMeetingsStudents[] = [];
+  availableDates: AvailableMeetingsStudents[] = [];
   displayedMeetings: AvailableMeetingsStudents[] = [];
   filteredCoaches: SelectedCoachesType = {};
   selectedCoach: string | null = null;
@@ -43,9 +44,25 @@ class StudentStore {
     this.students = [...this.students, value];
   }
 
+  setAllMeetings(
+    available: AvailableMeetingsStudents,
+    booked: AvailableMeetingsStudents
+  ) {
+    this.allMeetings = [...available, ...booked];
+    console.log('all meetings', this.allMeetings);
+  }
+
   setAvailableMeetings(meetings) {
     this.availableMeetings = meetings;
     this.setDisplayedMeetings(meetings);
+  }
+
+  setBookedMeetings(booked: AvailableMeetingsStudents[]) {
+    this.bookedMeetings = booked;
+  }
+
+  setAvailableDates(dates: AvailableMeetingsStudents[]) {
+    this.availableDates = dates;
   }
 
   setDisplayedMeetings(meetings) {
@@ -73,6 +90,8 @@ class StudentStore {
 
   resetStudentUI() {
     this.displayedMeetings = [];
+    this.bookedMeetings = [];
+    this.availableDates = [];
     this.filteredCoaches = {};
     this.selectedCoach = null;
     this.selectedBooking = { coach_id: '', time_slot_id: '', user_id: '' };

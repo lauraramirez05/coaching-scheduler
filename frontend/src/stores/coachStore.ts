@@ -1,8 +1,6 @@
 import { makeAutoObservable } from 'mobx';
 import { CoachResponse } from '../services/coachServices';
-import {
-  TimeSlotCoach,
-} from '../services/timeSlotServices';
+import { TimeSlotCoach } from '../services/timeSlotServices';
 
 class CoachStore {
   coaches: CoachResponse[] = [];
@@ -44,6 +42,7 @@ class CoachStore {
 
   resetCoachUI() {
     this.currentCoach = {};
+    this.allCoachMeetings = [];
     this.setDisplayedMeetings([]);
   }
 }

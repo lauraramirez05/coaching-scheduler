@@ -20,6 +20,7 @@ import {
   getBookedMeetingsForStudent,
 } from '../services/timeSlotServices';
 import timeSlotStore from '../stores/timeSlotStore';
+import dayjs from 'dayjs';
 
 const UserSelector = ({ data, handleSubmit }) => {
   const [opened, { open, close }] = useDisclosure(false);
@@ -59,8 +60,30 @@ const UserSelector = ({ data, handleSubmit }) => {
     try {
       const availableMeetings: AvailableMeetingsStudents[] =
         (await getAllAvailableMeetingsForStudents()) || [];
-      
-      // const bookedMeetings: AvailableMeetingsStudents[] = (await getBookedMeetingsForStudent())
+
+      const bookedMeetings: AvailableMeetingsStudents[] =
+        await getBookedMeetingsForStudent(
+          userStore.currentUser.id,
+          userStore.userTimeZone
+        );
+
+      studentStore.setBookedMeetings(bookedMeetings);
+
+      const availableDates = {};
+
+      Object.values(availableMeetings).forEach((meeting) => {
+        const date = dayjs(meeting.start_time).format('YYYY-MM-DD');
+        if (!availableDates[date]) {
+          availableDates[date] = {
+            date: date,
+            meetings: [],
+          };
+        }
+        availableDates[date].meetings.push(meeting);
+      });
+
+      studentStore.setAvailableDates(Object.values(availableDates));
+
       studentStore.setAvailableMeetings(Object.values(availableMeetings));
     } catch (error) {
       console.error(
@@ -93,7 +116,7 @@ const UserSelector = ({ data, handleSubmit }) => {
       <Avatar>
         <FontAwesomeIcon icon={faUserPlus} onClick={open} />
       </Avatar>
-      <span>Create New Coach</span>
+      <span>Create New {userStore.currentRole}</span>
     </Combobox.Option>,
   ];
 
@@ -102,6 +125,7 @@ const UserSelector = ({ data, handleSubmit }) => {
     getUserTimeZone();
 
     if (userStore.currentRole === 'coach') {
+      coachStore.resetCoachUI();
       fetchAllMeetingsForCoach();
     } else if (userStore.currentRole === 'student') {
       studentStore.resetStudentUI();

@@ -3,7 +3,10 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { observer } from 'mobx-react-lite';
-import { TimeSlotCoach } from '../services/timeSlotServices';
+import {
+  AvailableMeetingsStudents,
+  TimeSlotCoach,
+} from '../services/timeSlotServices';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
@@ -16,7 +19,11 @@ dayjs.extend(timezone);
 
 // Define props interface
 interface CalendarProps {
-  meetings: TimeSlotCoach[];
+  meetings: TimeSlotCoach[] | AvailableMeetingsStudents[];
+  availableDate: {
+    date: string;
+    meetings: AvailableMeetingsStudents[];
+  };
 }
 
 interface EventMeetingsType {
@@ -24,8 +31,14 @@ interface EventMeetingsType {
   date: string;
 }
 
-const Calendar: React.FC<CalendarProps> = ({ meetings }) => {
+const Calendar: React.FC<CalendarProps> = ({
+  meetings,
+  availableDate = [],
+}) => {
   const { userStore } = useContext(StoreContext);
+
+  console.log(meetings);
+  console.log(availableDate);
 
   const eventMeetings: EventMeetingsType[] = [];
   console.log('meetings', meetings);
@@ -39,10 +52,25 @@ const Calendar: React.FC<CalendarProps> = ({ meetings }) => {
         // Convert to the desired timezone if needed, e.g., 'America/New_York'
         start: dayjs(meet.start_time).tz(userStore.userTimeZone).toISOString(),
         end: dayjs(meet.end_time).tz(userStore.userTimeZone).toISOString(),
-        student_phone: `${meet.student_phone ? meet.student_phone : null}`,
-        
+        // student_phone: `${meet.student_phone ? meet.student_phone : null}`,
+        // coach_phone: `${meet.coach_phone ? meet.coach_phone : null}`,
+        phone: meet.student_phone
+          ? meet.student_phone
+          : meet.coach_phone || null,
         status: `${meet.status}`,
         color: `${meet.status === 'booked' ? 'purple' : ''}`,
+      });
+    });
+  }
+
+  if (availableDate.length > 0) {
+    availableDate.forEach((date) => {
+      eventMeetings.push({
+        start: dayjs(date.date).startOf('day').toISOString(),
+        end: dayjs(date.date).endOf('day').toISOString(),
+        allDay: true,
+        color: 'lightblue',
+        display: 'background',
       });
     });
   }
@@ -55,10 +83,14 @@ const Calendar: React.FC<CalendarProps> = ({ meetings }) => {
 
     return (
       <div>
-        <b>{eventInfo.event.title && eventInfo.event.title}</b>
+        <b className='text-xs'>
+          {eventInfo.event.title && eventInfo.event.title}
+        </b>
         {!isAvailable && (
           <p className='text-xs'>
-            {formatPhoneNumber(eventInfo.event.extendedProps.student_phone)}
+            {eventInfo.event.extendedProps.phone
+              ? formatPhoneNumber(eventInfo.event.extendedProps.phone)
+              : ''}
           </p>
         )}
       </div>

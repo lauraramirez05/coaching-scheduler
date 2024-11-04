@@ -67,7 +67,7 @@ const CoachUI = observer(() => {
 
   return (
     <div>
-      <div>
+      <div className='absolute right-0 mr-4 top-4'>
         <UserSelector data={coachStore.coaches} handleSubmit={handleSubmit} />
       </div>
       <div className='flex justify-start w-full gap-4 p-1.5'>

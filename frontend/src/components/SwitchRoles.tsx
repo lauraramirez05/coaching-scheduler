@@ -22,6 +22,7 @@ const SwitchRoles = observer(() => {
         { label: 'Coach', value: 'coach' },
         { label: 'Student', value: 'student' },
       ]}
+      className='w-96'
     />
   );
 });
