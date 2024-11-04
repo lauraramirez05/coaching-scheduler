@@ -19,7 +19,7 @@ class TimeSlotStore {
     makeAutoObservable(this);
   }
 
-  setSelectedDays(day: Date | Dayjs) {
+  setSelectedDays(day: Dayjs) {
     this.selectedDays.push(day);
 
     const dateStr = dayjs(day).format('YYYY-MM-DD');
@@ -97,10 +97,6 @@ class TimeSlotStore {
       end_time: '',
     };
   }
-
-  // setCalendarEvents(value: {}) {
-  //   this.calendarEvents.push(value);
-  // }
 }
 
 const timeSlotStore = new TimeSlotStore();

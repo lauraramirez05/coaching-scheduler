@@ -1,4 +1,5 @@
 import { Dayjs } from 'dayjs';
+import { CoachData } from './coachServices';
 
 export interface TimeSlot {
   startTime: Dayjs | string;
@@ -30,16 +31,12 @@ export interface TimeSlotCoach {
   student_phone?: string;
 }
 
-interface coaches {
-  id: string;
-  name: string;
-}
 
 export interface AvailableMeetingsStudents {
   time_slot_id: string;
   start_time: string;
   end_time: string;
-  coaches: coaches[];
+  coaches: CoachData[];
   status?: string;
 }
 

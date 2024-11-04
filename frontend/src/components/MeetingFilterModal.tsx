@@ -12,6 +12,9 @@ import {
 const MeetingFilterModal = observer(() => {
   const { userStore, coachStore, studentStore } = useContext(StoreContext);
 
+  console.log(userStore.currentRole);
+  console.log(timeSlotStore.meetingStatus);
+
   useEffect(() => {
     console.log('in the use effect');
     if (userStore.currentRole === 'coach' && userStore.currentUser) {

@@ -1,10 +1,13 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, action } from 'mobx';
 import { StudentData, StudentResponse } from '../services/studentServices';
 import {
   AvailableMeetingsStudents,
   BookTimeSlotResponse,
   SelectedBooking,
 } from '../services/timeSlotServices';
+import dayjs from 'dayjs';
+import { getAllAvailableMeetingsForStudents } from '../services/timeSlotServices';
+import { getBookedMeetingsForStudent } from '../services/timeSlotServices';
 
 interface SelectedCoachesType {
   [id: string]: boolean;
@@ -105,6 +108,8 @@ class StudentStore {
   setConfirmedBooking(booking: BookTimeSlotResponse) {
     this.confirmedBooking = booking;
   }
+
+  
 }
 
 const studentStore = new StudentStore();
