@@ -73,141 +73,143 @@ const CoachUI = observer(() => {
     timeSlotStore.setTimeSlotUnderReview(meeting);
   };
 
-  console.log(coachStore.allCoachMeetings);
-
   return (
     <div>
-      <div className='absolute right-0 mr-4 top-4'>
+      <div className='absolute right-0 mr-4 top-4 w-48'>
         <UserSelector data={coachStore.coaches} handleSubmit={handleSubmit} />
       </div>
-      <div className='flex justify-around w-full gap-4 '>
+      <div className='flex justify-around w-full gap-4'>
         <div>
           <Calendar meetings={coachStore.allCoachMeetings} />
         </div>
         <div>
           {userStore.currentUser && userStore.currentUser !== 'create-new' ? (
-            <div className='w-full flex flex-col justify-start'>
-              <div className='mb-4'>
+            <div className='w-full flex flex-col justify-start items-center'>
+              <div className='mb-4 self-end'>
                 <Button variant='light' onClick={openAddTimeSlot}>
                   Add Time Slot
                 </Button>
               </div>
               <MeetingFilterModal />
-              <div className='flex flex-col gap-4 mt-4 items-center overflow-scroll'>
+              <div className=' items-center h-full'>
                 {coachStore.displayedMeetings.length === 0 ? (
                   <p>There are no {timeSlotStore.meetingStatus} slots</p>
                 ) : (
-                  coachStore.displayedMeetings.map((meeting) => (
-                    <Card
-                      key={meeting.tsc_id}
-                      // title='Meeting Info'
-                      className={`flex flex-col w-80 ${
-                        meeting.status === 'available'
-                          ? 'border-2 border-blue-600'
-                          : meeting.status === 'booked'
-                          ? 'border-2 border-fuchsia-700'
-                          : ''
-                      } `}
-                    >
-                      <div className='flex gap-4'>
-                        <FontAwesomeIcon
-                          icon={faCalendarDays}
-                          className='self-center'
-                        />
-                        <p className='font-bold'>
-                          {/* <strong>Date:</strong>{' '} */}
-                          {dayjs(meeting.start_time).format(
-                            'dddd, MMMM D, YYYY'
-                          )}
-                        </p>
-                      </div>
-                      <div>
-                        <div className='flex gap-16'>
-                          <p>
-                            <FontAwesomeIcon icon={faClock} />
-                            {dayjs(meeting.start_time).format('HH:mm')}
-                          </p>
-                          <p>
-                            <FontAwesomeIcon icon={faClock} />
-                            {dayjs(meeting.end_time).format('HH:mm')}
+                  <div className=' flex flex-col gap-4 mt-4 w-full max-h-[470px] overflow-y-auto'>
+                    {coachStore.displayedMeetings.map((meeting) => (
+                      <Card
+                        key={meeting.tsc_id}
+                        // title='Meeting Info'
+                        className={`flex flex-col w-80 ${
+                          meeting.status === 'available'
+                            ? 'border-2 border-blue-600'
+                            : meeting.status === 'booked'
+                            ? 'border-2 border-fuchsia-700'
+                            : ''
+                        } `}
+                      >
+                        <div className='flex gap-4'>
+                          <FontAwesomeIcon
+                            icon={faCalendarDays}
+                            className='self-center'
+                          />
+                          <p className='font-bold'>
+                            {/* <strong>Date:</strong>{' '} */}
+                            {dayjs(meeting.start_time).format(
+                              'dddd, MMMM D, YYYY'
+                            )}
                           </p>
                         </div>
+                        <div>
+                          <div className='flex gap-16'>
+                            <p>
+                              <FontAwesomeIcon icon={faClock} />
+                              {dayjs(meeting.start_time).format('HH:mm')}
+                            </p>
+                            <p>
+                              <FontAwesomeIcon icon={faClock} />
+                              {dayjs(meeting.end_time).format('HH:mm')}
+                            </p>
+                          </div>
 
-                        {timeSlotStore.meetingStatus === 'completed' ? (
-                          <div className='flex flex-col'>
+                          {timeSlotStore.meetingStatus === 'completed' ? (
+                            <div className='flex flex-col'>
+                              <div className='flex justify-between'>
+                                <p className='text-sky-700 font-bold'>
+                                  {meeting.student_name
+                                    ? meeting.student_name
+                                    : ''}
+                                </p>
+                                <Rating
+                                  defaultValue={
+                                    meeting.rating ? meeting.rating : 0
+                                  }
+                                  readOnly
+                                />
+                                <div className='transform transition-transform duration-200 hover:scale-125 cursor-pointer'>
+                                  <Tooltip label='See notes'>
+                                    <FontAwesomeIcon
+                                      icon={faNoteSticky}
+                                      className='text-blue-500'
+                                      onClick={() =>
+                                        coachStore.setNotesDisplay(meeting)
+                                      }
+                                    />
+                                  </Tooltip>
+                                </div>
+                              </div>
+
+                              {coachStore.notesDisplay &&
+                                coachStore.notesDisplay.tsc_id ===
+                                  meeting.tsc_id && (
+                                  <div className='my-2 p-2 border rounded shadow'>
+                                    <p>
+                                      {coachStore.notesDisplay.notes
+                                        ? coachStore.notesDisplay.notes
+                                        : 'No Notes Available'}
+                                    </p>
+                                  </div>
+                                )}
+
+                              <Button
+                                onClick={() => handleReviewClick(meeting)}
+                                size='xs'
+                                variant='light'
+                                className='item-center mt-2'
+                              >
+                                Review
+                              </Button>
+                            </div>
+                          ) : timeSlotStore.meetingStatus === 'booked' ? (
                             <div className='flex justify-between'>
-                              <p>
+                              <div>
                                 {meeting.student_name
                                   ? meeting.student_name
                                   : ''}
-                              </p>
-                              <Rating
-                                defaultValue={
-                                  meeting.rating ? meeting.rating : 0
-                                }
-                                readOnly
-                              />
-                              <div className='transform transition-transform duration-200 hover:scale-125'>
-                                <Tooltip label='See notes'>
-                                  <FontAwesomeIcon
-                                    icon={faNoteSticky}
-                                    className='text-blue-500'
-                                    onClick={() =>
-                                      coachStore.setNotesDisplay(meeting)
-                                    }
-                                  />
-                                </Tooltip>
+                              </div>
+                              <div>
+                                {meeting.student_phone
+                                  ? formatPhoneNumber(meeting.student_phone)
+                                  : ''}
                               </div>
                             </div>
-
-                            {coachStore.notesDisplay &&
-                              coachStore.notesDisplay.tsc_id ===
-                                meeting.tsc_id && (
-                                <div className='my-2 p-2 border rounded shadow'>
-                                  <p>
-                                    {coachStore.notesDisplay.notes
-                                      ? coachStore.notesDisplay.notes
-                                      : 'No Notes Available'}
-                                  </p>
-                                </div>
-                              )}
-
-                            <Button
-                              onClick={() => handleReviewClick(meeting)}
-                              size='xs'
-                              variant='light'
-                              className='item-center'
+                          ) : (
+                            <div
+                              className={` w-fit px-1 py-0.5 leading-none rounded-md mt-2 ${
+                                meeting.status === 'available'
+                                  ? 'bg-green-200 shadow-md text-green-700'
+                                  : ''
+                              }`}
                             >
-                              Review
-                            </Button>
-                          </div>
-                        ) : timeSlotStore.meetingStatus === 'booked' ? (
-                          <div className='flex justify-between'>
-                            <div>
-                              {meeting.student_name ? meeting.student_name : ''}
+                              {meeting.status
+                                ? meeting.status
+                                : meeting.dataValues.status}
                             </div>
-                            <div>
-                              {meeting.student_phone
-                                ? formatPhoneNumber(meeting.student_phone)
-                                : ''}
-                            </div>
-                          </div>
-                        ) : (
-                          <div
-                            className={` w-fit px-1 py-0.5 leading-none rounded-md mt-2 ${
-                              meeting.status === 'available'
-                                ? 'bg-green-200 shadow-md text-green-700'
-                                : ''
-                            }`}
-                          >
-                            {meeting.status
-                              ? meeting.status
-                              : meeting.dataValues.status}
-                          </div>
-                        )}
-                      </div>
-                    </Card>
-                  ))
+                          )}
+                        </div>
+                      </Card>
+                    ))}{' '}
+                  </div>
                 )}
               </div>
             </div>

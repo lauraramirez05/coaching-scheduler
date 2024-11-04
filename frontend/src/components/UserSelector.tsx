@@ -98,7 +98,7 @@ const UserSelector = ({ data, handleSubmit }) => {
       <Combobox.Option
         value={item}
         key={item.id}
-        className='grid grid-cols-2 items-center'
+        className='grid grid-cols-[auto_1fr] items-center gap-2'
       >
         <Avatar color='cyan' radius='xl'>
           {item.name.charAt(0)}
@@ -110,7 +110,7 @@ const UserSelector = ({ data, handleSubmit }) => {
     <Combobox.Option
       value='create-new'
       key='create-new'
-      className='grid grid-cols-2 items-center'
+      className='grid grid-cols-[auto_1fr] items-center gap-2'
       onClick={open}
     >
       <Avatar>
@@ -149,17 +149,14 @@ const UserSelector = ({ data, handleSubmit }) => {
         onOptionSubmit={(val) => handleUserSelection(val)}
       >
         <Combobox.Target className='cursor-pointer bg-white border border-gray-300 rounded-md px-3 py-2 max-w-xs mx-auto flex items-center justify-center'>
-          <div
-            onClick={() => combobox.toggleDropdown()}
-            className='flex items-center'
-          >
+          <div onClick={() => combobox.toggleDropdown()}>
             {userStore.currentUser !== null &&
             userStore.currentUser !== 'create-new' ? (
               <>
-                <Avatar color='cyan' radius='xl' className='mr-2'>
+                <Avatar color='cyan' radius='xl'>
                   {userStore.currentUser.name.charAt(0)}
                 </Avatar>
-                <span>{userStore.currentUser.name}</span>
+                <span className='flex-1'>{userStore.currentUser.name}</span>
               </>
             ) : (
               <>

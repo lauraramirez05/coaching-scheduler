@@ -15,7 +15,6 @@ const App = observer(() => {
 
   return (
     <StoreContext.Provider value={rootStore}>
-      {/* <Calendar /> */}
       <div className='h-full'>
         <div className='relative flex flex-col font-sans items-center border-b border-b-gray-300 shadow-md rounded-md pb-4 h-[100px]'>
           <h1>Schedulink</h1>

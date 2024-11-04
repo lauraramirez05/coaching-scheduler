@@ -287,6 +287,7 @@ const availableMeetingForStudents = async (req, res) => {
       ts.start_time,
       ts.end_time,
       tsc.coach_id,
+      tsc.status,
       c.name AS coach_name
     FROM
       time_slots ts
@@ -488,12 +489,23 @@ const validateBookingData = async (req, res) => {
           'You have overlapping bookings, please choose a different time slot.',
       });
     }
-
+    console.log('TIME SLOT', timeSlot);
     // Update the time slot to mark it as booked
-    const updatedTimeSlot = await timeSlot.update({
-      status: 'booked',
-      participants: student_id,
-    });
+    const updatedTimeSlot = await sequelize.query(
+      `
+      UPDATE time_slot_coaches 
+      SET status = :status, participants = :participants 
+      WHERE id = :timeSlotCoachesId
+      `,
+      {
+        replacements: {
+          status: 'booked',
+          participants: student_id,
+          timeSlotCoachesId: timeSlot[0].time_slot_coaches_id,
+        },
+        type: sequelize.QueryTypes.UPDATE,
+      }
+    );
 
     const coach = await Coach.findOne({
       where: {
@@ -502,6 +514,7 @@ const validateBookingData = async (req, res) => {
       attributes: ['phone'],
     });
 
+    console.log(updatedTimeSlot);
     return res.status(200).json({
       updatedTimeSlot,
       coachPhone: coach.phone, // Send the coach's phone number

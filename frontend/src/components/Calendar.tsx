@@ -36,7 +36,6 @@ const Calendar: React.FC<CalendarProps> = ({
   availableDate = [],
 }) => {
   const { userStore } = useContext(StoreContext);
-  const calendarRef = useRef<FullCalendar | null>(null);
 
   console.log(meetings);
   console.log(availableDate);
@@ -103,7 +102,6 @@ const Calendar: React.FC<CalendarProps> = ({
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView='dayGridMonth'
-        timeZone={userStore.userTimeZone}
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',

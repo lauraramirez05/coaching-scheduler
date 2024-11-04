@@ -145,8 +145,14 @@ const AddTimeSlotModal = ({ opened, onClose }: AddTimeSlotModalProps) => {
         timeZone: userStore.userTimeZone,
       });
       const approvedTimeSlots = response.createdLinks;
+      console.log('aproved slot', approvedTimeSlots);
       approvedTimeSlots.forEach((slot) => {
-        coachStore.refreshMeetings(slot);
+        const modifiedSlot = {
+          ...slot.dataValues,
+          start_time: slot.start_time,
+          end_time: slot.end_time,
+        };
+        coachStore.refreshMeetings(modifiedSlot);
       });
 
       if (response.errors && response.errors.length > 0) {
