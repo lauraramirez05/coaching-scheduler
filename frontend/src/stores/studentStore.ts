@@ -47,14 +47,6 @@ class StudentStore {
     this.students = [...this.students, value];
   }
 
-  setAllMeetings(
-    available: AvailableMeetingsStudents,
-    booked: AvailableMeetingsStudents
-  ) {
-    this.allMeetings = [...available, ...booked];
-    console.log('all meetings', this.allMeetings);
-  }
-
   setAvailableMeetings(meetings) {
     this.availableMeetings = meetings;
     this.setDisplayedMeetings(meetings);
@@ -108,8 +100,6 @@ class StudentStore {
   setConfirmedBooking(booking: BookTimeSlotResponse) {
     this.confirmedBooking = booking;
   }
-
-  
 }
 
 const studentStore = new StudentStore();

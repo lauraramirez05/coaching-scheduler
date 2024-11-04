@@ -19,7 +19,6 @@ import {
 } from '../services/timeSlotServices';
 
 const MeetingCard = ({ meeting, handleReview }) => {
-  console.log('MEETING', meeting);
   const { studentStore, userStore, coachStore, timeSlotStore } =
     useContext(StoreContext);
 

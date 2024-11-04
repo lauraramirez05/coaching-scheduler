@@ -489,7 +489,7 @@ const validateBookingData = async (req, res) => {
           'You have overlapping bookings, please choose a different time slot.',
       });
     }
-    console.log('TIME SLOT', timeSlot);
+
     // Update the time slot to mark it as booked
     const updatedTimeSlot = await sequelize.query(
       `
@@ -514,7 +514,6 @@ const validateBookingData = async (req, res) => {
       attributes: ['phone'],
     });
 
-    console.log(updatedTimeSlot);
     return res.status(200).json({
       updatedTimeSlot,
       coachPhone: coach.phone, // Send the coach's phone number

@@ -11,9 +11,7 @@ import {
 import Calendar from './Calendar';
 import { Checkbox } from '@mantine/core';
 import debounce from 'lodash.debounce';
-import {
-  getAllAvailableMeetingsForStudents,
-} from '../services/timeSlotServices';
+import { getAllAvailableMeetingsForStudents } from '../services/timeSlotServices';
 import MeetingFilterModal from './MeetingFilterModal';
 import timeSlotStore from '../stores/timeSlotStore';
 import MeetingCard from './MeetingCard';
@@ -110,7 +108,7 @@ const StudentUI = observer(() => {
                     coachStore.coaches &&
                     coachStore.coaches.map((coach) => {
                       const [firstName, lastName] = coach.name.split(' ');
-                      const lastInitial = lastName ? lastName.charAt(0) : ''; // Get the first letter of the last name
+                      const lastInitial = lastName ? lastName.charAt(0) : '';
 
                       return (
                         <Checkbox

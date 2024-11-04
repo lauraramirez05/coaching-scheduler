@@ -140,7 +140,6 @@ const AddTimeSlotModal = ({ opened, onClose }: AddTimeSlotModalProps) => {
         timeZone: userStore.userTimeZone,
       });
       const approvedTimeSlots = response.createdLinks;
-      console.log('aproved slot', approvedTimeSlots);
       approvedTimeSlots.forEach((slot) => {
         const modifiedSlot = {
           ...slot.dataValues,
