@@ -50,14 +50,34 @@ class StudentStore {
   setAvailableMeetings(meetings) {
     this.availableMeetings = meetings;
     this.setDisplayedMeetings(meetings);
+    this.setAvailableDates(meetings);
   }
 
   setBookedMeetings(booked: AvailableMeetingsStudents[]) {
     this.bookedMeetings = booked;
   }
 
+  updateBookedMeeting(meeting) {
+    this.bookedMeetings.push(meeting);
+    console.log('BOOKED MEETINGS', this.bookedMeetings);
+  }
+
   setAvailableDates(dates: AvailableMeetingsStudents[]) {
-    this.availableDates = dates;
+    const openDates = {};
+
+    this.availableMeetings.forEach((dates) => {
+      const day = dayjs(dates.start_time).format('YYYY-MM-DD');
+
+      if (!openDates[day]) {
+        openDates[day] = {
+          date: day,
+          meetings: [],
+        };
+      }
+      openDates[day].meetings.push(dates);
+    });
+
+    this.availableDates = Object.values(openDates);
   }
 
   setDisplayedMeetings(meetings) {
@@ -99,6 +119,7 @@ class StudentStore {
 
   setConfirmedBooking(booking: BookTimeSlotResponse) {
     this.confirmedBooking = booking;
+    console.log('confirmed booking', this.confirmedBooking);
   }
 }
 

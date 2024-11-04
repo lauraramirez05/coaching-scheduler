@@ -31,7 +31,6 @@ export interface TimeSlotCoach {
   student_phone?: string;
 }
 
-
 export interface AvailableMeetingsStudents {
   time_slot_id: string;
   start_time: string;
@@ -220,6 +219,7 @@ export const bookTimeSlot = async (
     }
 
     const data = await response.json();
+    console.log('DATA', data);
     return {
       data,
       status: 'success',

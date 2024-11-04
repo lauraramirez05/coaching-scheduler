@@ -38,13 +38,16 @@ const MeetingCard = ({ meeting, handleReview }) => {
 
       if (result.status === 'success') {
         studentStore.setConfirmedBooking(result);
+        console.log('result', result.data.timeSlot);
+        studentStore.updateBookedMeeting(result.data.timeSlot);
 
         alert(result.message);
 
         const fetchAvailableMeetings = async () => {
           try {
             const availableMeetings: AvailableMeetingsStudents[] =
-              (await getAllAvailableMeetingsForStudents()) || [];
+              await getAllAvailableMeetingsForStudents();
+
             studentStore.setAvailableMeetings(Object.values(availableMeetings));
           } catch (error) {
             console.error(
