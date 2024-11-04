@@ -34,11 +34,24 @@ a:hover {
 
 body {
   height: 100vh;
+  overflow: hidden;
 }
 
 h1 {
   font-size: 2.5em;
   line-height: 1.1;
+}
+
+/*Full calendar styling*/
+.fc {
+  height: 590px;
+}
+.fc .fc-toolbar-title {
+  font-size: 1.5em;
+}
+
+.fc .fc-button {
+  font-size: 0.8em;
 }
 
 @media (prefers-color-scheme: light) {

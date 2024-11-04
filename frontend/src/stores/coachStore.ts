@@ -7,6 +7,7 @@ class CoachStore {
   currentCoach = {};
   allCoachMeetings: TimeSlotCoach[] = [];
   displayedMeetings: TimeSlotCoach[] = [];
+  notesDisplay: TimeSlotCoach | null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -26,6 +27,14 @@ class CoachStore {
 
   setDisplayedMeetings(value: TimeSlotCoach[]) {
     this.displayedMeetings = value;
+  }
+
+  setNotesDisplay(value: TimeSlotCoach) {
+    if (!this.notesDisplay) {
+      this.notesDisplay = value;
+    } else {
+      this.notesDisplay = null;
+    }
   }
 
   refreshMeetings(value) {

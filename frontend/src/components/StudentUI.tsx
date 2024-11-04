@@ -146,7 +146,7 @@ const StudentUI = observer(() => {
           handleSubmit={handleSubmit}
         />
       </div>
-      <div className='flex justify-between'>
+      <div className='flex justify-between overflow-hidden'>
         <div className='flex justify-start w-full gap-4 p-1.5'>
           <Calendar
             meetings={studentStore.bookedMeetings}

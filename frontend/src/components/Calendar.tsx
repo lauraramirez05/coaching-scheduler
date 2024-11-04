@@ -11,7 +11,7 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { StoreContext } from '../stores/StoreContext';
-import { useContext } from 'react';
+import { useContext, useRef, useEffect } from 'react';
 import { formatPhoneNumber } from '../services/formatPhoneNumber';
 
 dayjs.extend(utc);
@@ -36,6 +36,7 @@ const Calendar: React.FC<CalendarProps> = ({
   availableDate = [],
 }) => {
   const { userStore } = useContext(StoreContext);
+  const calendarRef = useRef<FullCalendar | null>(null);
 
   console.log(meetings);
   console.log(availableDate);
@@ -46,9 +47,9 @@ const Calendar: React.FC<CalendarProps> = ({
   if (meetings !== undefined) {
     meetings.forEach((meet) => {
       eventMeetings.push({
-        title: `${dayjs(meet.start_time).format('H a')} - ${dayjs(
+        title: `${dayjs(meet.start_time).format('H:mm ')} - ${dayjs(
           meet.end_time
-        ).format('H a')}`,
+        ).format('H:mm')}`,
         // Convert to the desired timezone if needed, e.g., 'America/New_York'
         start: dayjs(meet.start_time).tz(userStore.userTimeZone).toISOString(),
         end: dayjs(meet.end_time).tz(userStore.userTimeZone).toISOString(),
@@ -98,10 +99,11 @@ const Calendar: React.FC<CalendarProps> = ({
   };
 
   return (
-    <div className='w-[800px] h-auto mx-auto p-0'>
+    <div className='min-w-[700px] max-w-[800px] w-full mx-auto'>
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView='timeGridWeek'
+        initialView='dayGridMonth'
+        timeZone={userStore.userTimeZone}
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',
