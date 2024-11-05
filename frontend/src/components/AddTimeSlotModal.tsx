@@ -103,11 +103,6 @@ const AddTimeSlotModal = ({ opened, onClose }: AddTimeSlotModalProps) => {
   const getDisabledTime: RangeDisabledTime = (now, type) => {
     const isToday = dayjs().isSame(now, 'day');
 
-    const disabledHours = [];
-    if (isToday) {
-      disabledHours.push(...Array.from({ length: now.hour() }, (_, i) => i));
-    }
-
     const commonDisabledHoursStart = [
       ...Array.from({ length: 8 }, (_, i) => i), // Before 8 AM
       ...Array.from({ length: 7 }, (_, i) => i + 19), // After 6 PM
@@ -145,7 +140,6 @@ const AddTimeSlotModal = ({ opened, onClose }: AddTimeSlotModalProps) => {
         timeZone: userStore.userTimeZone,
       });
       const approvedTimeSlots = response.createdLinks;
-      console.log('aproved slot', approvedTimeSlots);
       approvedTimeSlots.forEach((slot) => {
         const modifiedSlot = {
           ...slot.dataValues,

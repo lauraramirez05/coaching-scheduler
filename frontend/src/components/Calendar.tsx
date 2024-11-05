@@ -37,11 +37,7 @@ const Calendar: React.FC<CalendarProps> = ({
 }) => {
   const { userStore } = useContext(StoreContext);
 
-  console.log(meetings);
-  console.log(availableDate);
-
   const eventMeetings: EventMeetingsType[] = [];
-  console.log('meetings', meetings);
 
   if (meetings !== undefined) {
     meetings.forEach((meet) => {
@@ -79,7 +75,6 @@ const Calendar: React.FC<CalendarProps> = ({
     // Apply different background colors based on status
     const isAvailable =
       eventInfo.event.extendedProps.status === 'available' ? true : false;
-    console.log(eventInfo);
 
     return (
       <div>

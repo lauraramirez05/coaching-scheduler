@@ -419,7 +419,7 @@ const validateBookingData = async (req, res) => {
   try {
     const timeSlot = await sequelize.query(
       `
-    SELECT 
+    SELECT
       tsc.id AS time_slot_coaches_id,
       tsc.time_slot_id,
       ts.start_time,
@@ -427,13 +427,13 @@ const validateBookingData = async (req, res) => {
       tsc.coach_id,
       tsc.status,
       tsc.participants
-    FROM 
+    FROM
       time_slot_coaches AS tsc
-    JOIN 
+    JOIN
       time_slots AS ts ON tsc.time_slot_id = ts.id
-    WHERE 
+    WHERE
       tsc.time_slot_id = :timeSlotId
-    AND 
+    AND
       tsc.coach_id = :coachId
     LIMIT 1;
     `,
@@ -489,21 +489,17 @@ const validateBookingData = async (req, res) => {
           'You have overlapping bookings, please choose a different time slot.',
       });
     }
-    console.log('TIME SLOT', timeSlot);
-    // Update the time slot to mark it as booked
-    const updatedTimeSlot = await sequelize.query(
-      `
-      UPDATE time_slot_coaches 
-      SET status = :status, participants = :participants 
-      WHERE id = :timeSlotCoachesId
-      `,
+
+    const updateTimeSlot = await TimeSlotCoaches.update(
       {
-        replacements: {
-          status: 'booked',
-          participants: student_id,
-          timeSlotCoachesId: timeSlot[0].time_slot_coaches_id,
+        status: 'booked',
+        participants: student_id,
+      },
+      {
+        where: {
+          id: timeSlot[0].time_slot_coaches_id,
         },
-        type: sequelize.QueryTypes.UPDATE,
+        returning: true, // This option allows you to get the updated rows
       }
     );
 
@@ -514,11 +510,39 @@ const validateBookingData = async (req, res) => {
       attributes: ['phone'],
     });
 
-    console.log(updatedTimeSlot);
-    return res.status(200).json({
-      updatedTimeSlot,
-      coachPhone: coach.phone, // Send the coach's phone number
-    });
+    const timeSlotUpdated = await sequelize.query(
+      `
+    SELECT
+      tsc.id AS time_slot_coaches_id,
+      tsc.time_slot_id,
+      ts.start_time,
+      ts.end_time,
+      tsc.coach_id,
+      tsc.status,
+      tsc.participants,
+      c.phone AS coach_phone
+    FROM
+      time_slot_coaches AS tsc
+    JOIN
+      time_slots AS ts ON tsc.time_slot_id = ts.id
+    LEFT JOIN
+      coaches c ON tsc.coach_id = c.id
+    WHERE
+      tsc.time_slot_id = :timeSlotId
+    AND
+      tsc.coach_id = :coachId
+    LIMIT 1;
+    `,
+      {
+        replacements: {
+          timeSlotId: time_slot_id,
+          coachId: coach_id,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    return res.status(200).json({ timeSlot: timeSlotUpdated[0] });
   } catch (error) {
     console.error('Error during booking validation:', error);
     return res

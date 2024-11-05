@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useContext } from 'react';
 import {
   InputBase,
   Combobox,
@@ -69,20 +69,20 @@ const UserSelector = ({ data, handleSubmit }) => {
 
       studentStore.setBookedMeetings(bookedMeetings);
 
-      const availableDates = {};
+      // const availableDates = {};
 
-      Object.values(availableMeetings).forEach((meeting) => {
-        const date = dayjs(meeting.start_time).format('YYYY-MM-DD');
-        if (!availableDates[date]) {
-          availableDates[date] = {
-            date: date,
-            meetings: [],
-          };
-        }
-        availableDates[date].meetings.push(meeting);
-      });
+      // Object.values(availableMeetings).forEach((meeting) => {
+      //   const date = dayjs(meeting.start_time).format('YYYY-MM-DD');
+      //   if (!availableDates[date]) {
+      //     availableDates[date] = {
+      //       date: date,
+      //       meetings: [],
+      //     };
+      //   }
+      //   availableDates[date].meetings.push(meeting);
+      // });
 
-      studentStore.setAvailableDates(Object.values(availableDates));
+      // studentStore.setAvailableDates(Object.values(availableDates));
 
       studentStore.setAvailableMeetings(Object.values(availableMeetings));
     } catch (error) {

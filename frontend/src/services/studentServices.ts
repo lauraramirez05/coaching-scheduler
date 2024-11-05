@@ -1,3 +1,10 @@
+import dayjs from 'dayjs';
+import {
+  getAllAvailableMeetingsForStudents,
+  getBookedMeetingsForStudent,
+} from './timeSlotServices';
+import { AvailableMeetingsStudents } from './timeSlotServices';
+
 export interface StudentData {
   name: string;
   phone: string;
@@ -7,6 +14,11 @@ export interface StudentResponse {
   id: number;
   name: string;
   phone: string;
+}
+
+export interface AvailableDates {
+  date: string;
+  meetings: AvailableMeetingsStudents[];
 }
 
 const url = 'http://localhost:5001';

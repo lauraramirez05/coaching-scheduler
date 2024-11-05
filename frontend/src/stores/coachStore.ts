@@ -38,7 +38,6 @@ class CoachStore {
   }
 
   refreshMeetings(value) {
-    console.log('incoming', value);
     this.displayedMeetings.push(value);
     this.displayedMeetings.sort(
       (a, b) => new Date(a.start_time) - new Date(b.start_time)
@@ -48,9 +47,6 @@ class CoachStore {
     this.allCoachMeetings.sort(
       (a, b) => new Date(a.start_time) - new Date(b.start_time)
     );
-
-    console.log('displayed Meetings', this.displayedMeetings);
-    console.log('all meetings', this.allCoachMeetings);
   }
 
   resetCoachUI() {

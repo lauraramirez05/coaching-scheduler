@@ -4,10 +4,9 @@ import Student from '../models/Student.js';
 const createStudent = async (req, res, next) => {
   const { name, phone } = req.body;
 
-  console.log([name, phone]);
   try {
     const newStudent = await Student.create({ name, phone });
-    console.log(newStudent);
+
     res.status(201).json(newStudent);
   } catch (error) {
     res.status(400).json({ message: 'Error creating student', error });

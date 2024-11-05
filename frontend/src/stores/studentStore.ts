@@ -1,10 +1,13 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, action } from 'mobx';
 import { StudentData, StudentResponse } from '../services/studentServices';
 import {
   AvailableMeetingsStudents,
   BookTimeSlotResponse,
   SelectedBooking,
 } from '../services/timeSlotServices';
+import dayjs from 'dayjs';
+import { getAllAvailableMeetingsForStudents } from '../services/timeSlotServices';
+import { getBookedMeetingsForStudent } from '../services/timeSlotServices';
 
 interface SelectedCoachesType {
   [id: string]: boolean;
@@ -44,25 +47,37 @@ class StudentStore {
     this.students = [...this.students, value];
   }
 
-  setAllMeetings(
-    available: AvailableMeetingsStudents,
-    booked: AvailableMeetingsStudents
-  ) {
-    this.allMeetings = [...available, ...booked];
-    console.log('all meetings', this.allMeetings);
-  }
-
   setAvailableMeetings(meetings) {
     this.availableMeetings = meetings;
     this.setDisplayedMeetings(meetings);
+    this.setAvailableDates(meetings);
   }
 
   setBookedMeetings(booked: AvailableMeetingsStudents[]) {
     this.bookedMeetings = booked;
   }
 
+  updateBookedMeeting(meeting) {
+    this.bookedMeetings.push(meeting);
+    console.log('BOOKED MEETINGS', this.bookedMeetings);
+  }
+
   setAvailableDates(dates: AvailableMeetingsStudents[]) {
-    this.availableDates = dates;
+    const openDates = {};
+
+    this.availableMeetings.forEach((dates) => {
+      const day = dayjs(dates.start_time).format('YYYY-MM-DD');
+
+      if (!openDates[day]) {
+        openDates[day] = {
+          date: day,
+          meetings: [],
+        };
+      }
+      openDates[day].meetings.push(dates);
+    });
+
+    this.availableDates = Object.values(openDates);
   }
 
   setDisplayedMeetings(meetings) {
@@ -104,6 +119,7 @@ class StudentStore {
 
   setConfirmedBooking(booking: BookTimeSlotResponse) {
     this.confirmedBooking = booking;
+    console.log('confirmed booking', this.confirmedBooking);
   }
 }
 

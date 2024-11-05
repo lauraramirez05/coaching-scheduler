@@ -13,11 +13,8 @@ const MeetingFilterModal = observer(() => {
   const { userStore, coachStore, studentStore } = useContext(StoreContext);
 
   useEffect(() => {
-    console.log('in the use effect');
     if (userStore.currentRole === 'coach' && userStore.currentUser) {
-      console.log(`I'm a coach`);
       if (timeSlotStore.meetingStatus === 'available') {
-        console.log('all coach', coachStore.allCoachMeetings);
         const availableSlots = coachStore.allCoachMeetings.filter((slot) => {
           return slot.status === 'available';
         });
@@ -40,9 +37,7 @@ const MeetingFilterModal = observer(() => {
         fetchPastMeetings();
       }
     } else if (userStore.currentRole === 'student' && userStore.currentUser) {
-      console.log('we are students');
       if (timeSlotStore.meetingStatus === 'booked') {
-        console.log('it is booked');
         const fetchBookedMeetings = async () => {
           const bookedMeetings = await getBookedMeetingsForStudent(
             userStore.currentUser.id,
@@ -54,7 +49,6 @@ const MeetingFilterModal = observer(() => {
 
         fetchBookedMeetings();
       } else if (timeSlotStore.meetingStatus === 'available') {
-        console.log(`it is available`);
         const fetchAvailableMeetingsForStudents = async () => {
           const allAvailableMeetingsForStudents =
             await getAllAvailableMeetingsForStudents();
@@ -68,8 +62,6 @@ const MeetingFilterModal = observer(() => {
       }
     }
   }, [timeSlotStore.meetingStatus]);
-
-  console.log(timeSlotStore.meetingStatus);
 
   const getSegmentedControlData = () => {
     if (userStore.currentRole === 'coach') {

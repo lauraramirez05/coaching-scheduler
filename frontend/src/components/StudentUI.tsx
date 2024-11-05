@@ -9,24 +9,12 @@ import {
   getAllStudents,
 } from '../services/studentServices';
 import Calendar from './Calendar';
-import { Checkbox, Avatar, Button } from '@mantine/core';
-import { Card } from 'antd';
-import dayjs from 'dayjs';
+import { Checkbox } from '@mantine/core';
 import debounce from 'lodash.debounce';
-import {
-  bookTimeSlot,
-  getAllAvailableMeetingsForStudents,
-} from '../services/timeSlotServices';
+import { getAllAvailableMeetingsForStudents } from '../services/timeSlotServices';
 import MeetingFilterModal from './MeetingFilterModal';
 import timeSlotStore from '../stores/timeSlotStore';
-import { formatPhoneNumber } from '../services/formatPhoneNumber';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faCalendarDays,
-  faClock,
-  faUser,
-  faPhone,
-} from '@fortawesome/free-solid-svg-icons';
+import MeetingCard from './MeetingCard';
 
 const StudentUI = observer(() => {
   const { studentStore, userStore, coachStore } = useContext(StoreContext);
@@ -91,60 +79,6 @@ const StudentUI = observer(() => {
     fetchMeetings(studentStore.filteredCoaches);
   };
 
-  const handleCoachSelection = (
-    coachId: string,
-    timeSlotId: string,
-    userId: string
-  ) => {
-    studentStore.setSelectedCoach(coachId);
-    studentStore.setSelectedBooking(coachId, timeSlotId, userId);
-
-    if (studentStore.errorCard !== '') {
-      studentStore.setErrorCard('');
-    }
-  };
-
-  const handleBooking = async (timeSlotId) => {
-    if (!studentStore.selectedCoach) {
-      studentStore.setErrorCard(timeSlotId);
-      return;
-    }
-    if (
-      studentStore.selectedBooking.coach_id === '' ||
-      studentStore.selectedBooking.time_slot_id !== timeSlotId
-    ) {
-      studentStore.setErrorCard(studentStore.selectedBooking.time_slot_id);
-      return;
-    } else {
-      const result = await bookTimeSlot(studentStore.selectedBooking);
-
-      if (result.status === 'success') {
-        studentStore.setConfirmedBooking(result);
-
-        alert(result.message);
-
-        const fetchAvailableMeetings = async () => {
-          try {
-            const availableMeetings: AvailableMeetingsStudents[] =
-              (await getAllAvailableMeetingsForStudents()) || [];
-            studentStore.setAvailableMeetings(Object.values(availableMeetings));
-          } catch (error) {
-            console.error(
-              `Error is ${fetchAvailableMeetings}, couldn't get the meetings`,
-              error
-            );
-          }
-        };
-
-        fetchAvailableMeetings();
-
-        // studentStore.resetStudentUI();
-      } else if (result.status === 'error') {
-        alert(result.message); // Notify the user of the error
-      }
-    }
-  };
-
   return (
     <div>
       <div className='absolute right-0 mr-4 top-4 w-48'>
@@ -154,7 +88,7 @@ const StudentUI = observer(() => {
         />
       </div>
 
-      <div className='flex justify-around w-full gap-4'>
+      <div className='flex justify-around w-full gap-4 '>
         <div>
           <Calendar
             meetings={studentStore.bookedMeetings}
@@ -168,13 +102,13 @@ const StudentUI = observer(() => {
               <MeetingFilterModal />
               {timeSlotStore.meetingStatus === 'available'}{' '}
               {
-                <div className='flex justify-between my-4'>
+                <div className=' flex justify-between my-4 flex-wrap md:flex-nowrap '>
                   {timeSlotStore.meetingStatus === 'available' &&
                     userStore.currentUser &&
                     coachStore.coaches &&
                     coachStore.coaches.map((coach) => {
                       const [firstName, lastName] = coach.name.split(' ');
-                      const lastInitial = lastName ? lastName.charAt(0) : ''; // Get the first letter of the last name
+                      const lastInitial = lastName ? lastName.charAt(0) : '';
 
                       return (
                         <Checkbox
@@ -189,155 +123,9 @@ const StudentUI = observer(() => {
                     })}
                 </div>
               }
-              <div className=' flex flex-col gap-4 mt-4 w-full max-h-[470px] overflow-y-auto'>
-                {' '}
+              <div className='flex flex-col items-center gap-4 mt-4 h-[calc(100vh-230px)] max-h-[470px] sm:max-h-[600px] overflow-y-auto px-4 '>
                 {studentStore.displayedMeetings.map((meeting) => {
-                  return (
-                    <Card
-                      key={meeting.time_slot_id}
-                      className={`w-80 mb-4 ${
-                        studentStore.errorCard === meeting.time_slot_id
-                          ? 'border border-red-500'
-                          : ''
-                      } ${
-                        timeSlotStore.meetingStatus === 'available'
-                          ? 'border-2 border-blue-600'
-                          : meeting.status === 'booked'
-                          ? 'border-2 border-fuchsia-700'
-                          : ''
-                      }`}
-                    >
-                      {timeSlotStore.meetingStatus === 'available' ? (
-                        <div>
-                          <div className='flex gap-4'>
-                            <FontAwesomeIcon
-                              icon={faCalendarDays}
-                              className='self-center'
-                            />
-                            <p>
-                              {dayjs(meeting.start_time).format(
-                                'dddd, MMMM D, YYYY'
-                              )}
-                            </p>
-                          </div>
-
-                          <div className='flex gap-16'>
-                            <div className='flex items-center gap-2 '>
-                              <FontAwesomeIcon icon={faClock} />
-                              <p>
-                                {dayjs(meeting.start_time)
-                                  .tz(userStore.userTimeZone)
-                                  .format('HH:mm')}
-                              </p>
-                            </div>
-
-                            <div className='flex items-center gap-2 '>
-                              <FontAwesomeIcon icon={faClock} />
-                              <p>
-                                {dayjs(meeting.end_time)
-                                  .tz(userStore.userTimeZone)
-                                  .format('HH:mm')}
-                              </p>
-                            </div>
-                          </div>
-                          <div className='flex justify-center mt-2'>
-                            {meeting.coaches &&
-                              meeting.coaches.map((coach) => {
-                                const [firstName, lastName] =
-                                  coach.name.split(' ');
-                                const firstInitial = firstName.charAt(0);
-                                const lastInitial = lastName
-                                  ? lastName.charAt(0)
-                                  : '';
-
-                                const isSelected =
-                                  studentStore.selectedCoach === coach.id &&
-                                  studentStore.selectedBooking.time_slot_id ===
-                                    meeting.time_slot_id;
-
-                                return (
-                                  <Avatar
-                                    color='pink'
-                                    radius='xl'
-                                    size='md'
-                                    className={`mr-2 cursor-pointer transition-transform duration-200 ${
-                                      isSelected
-                                        ? 'ring-2 ring-pink-500 scale-105'
-                                        : 'hover:ring-2 hover:ring-pink-300 hover:scale-105'
-                                    }`}
-                                    key={`${meeting.time_slot_id}-${coach.id}`}
-                                    onClick={() =>
-                                      handleCoachSelection(
-                                        coach.id,
-                                        meeting.time_slot_id,
-                                        userStore.currentUser.id
-                                      )
-                                    }
-                                  >
-                                    {`${firstInitial}${lastInitial}`}
-                                  </Avatar>
-                                );
-                              })}
-                          </div>
-                          {studentStore.errorCard === meeting.time_slot_id && (
-                            <p className='text-red-500 mt-2 text-center'>
-                              Please select a coach
-                            </p>
-                          )}
-                          <Button
-                            variant='light'
-                            onClick={() => handleBooking(meeting.time_slot_id)}
-                          >
-                            Book
-                          </Button>
-                        </div>
-                      ) : (
-                        <div>
-                          <div className='flex gap-4'>
-                            <FontAwesomeIcon
-                              icon={faCalendarDays}
-                              className='self-center'
-                            />
-                            <p>
-                              {dayjs(meeting.start_time).format(
-                                'dddd, MMMM D, YYYY'
-                              )}
-                            </p>
-                          </div>
-                          <div className='flex gap-16'>
-                            <div className='flex items-center gap-2 '>
-                              <FontAwesomeIcon icon={faClock} />
-                              <p>
-                                {dayjs(meeting.start_time)
-                                  .tz(userStore.userTimeZone)
-                                  .format('HH:mm')}
-                              </p>
-                            </div>
-                            <div className='flex items-center gap-2 '>
-                              <FontAwesomeIcon icon={faClock} />
-                              <p>
-                                {dayjs(meeting.end_time)
-                                  .tz(userStore.userTimeZone)
-                                  .format('HH:mm')}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className='flex justify-between'>
-                            <div className='flex items-center gap-2 '>
-                              <FontAwesomeIcon icon={faUser} />
-                              <p>{meeting.coach_name}</p>
-                            </div>
-
-                            <div className='flex items-center gap-2 '>
-                              <FontAwesomeIcon icon={faPhone} />{' '}
-                              <p>{formatPhoneNumber(meeting.coach_phone)}</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </Card>
-                  );
+                  return <MeetingCard meeting={meeting} />;
                 })}
               </div>
             </div>

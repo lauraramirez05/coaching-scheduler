@@ -22,7 +22,7 @@ const App = observer(() => {
             <SwitchRoles />
           </div>
         </div>
-        <div className='p-4'>
+        <div className='p-4 '>
           {userStore.currentRole === 'student' ? <StudentUI /> : <CoachUI />}
         </div>
       </div>
