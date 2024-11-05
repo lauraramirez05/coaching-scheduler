@@ -44,7 +44,8 @@ h1 {
 
 /*Full calendar styling*/
 .fc {
-  height: 590px;
+  /* max-height: 590px; */
+  max-height: calc(100vh - 115px);
 }
 .fc .fc-toolbar-title {
   font-size: 1.5em;

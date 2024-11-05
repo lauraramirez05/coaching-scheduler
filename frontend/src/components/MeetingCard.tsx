@@ -79,7 +79,7 @@ const MeetingCard = ({ meeting, handleReview }) => {
 
   return (
     <Card
-      className={`flex flex-col w-80 ${
+      className={`flex flex-col w-80 md:max-w-[80%] lg:max-w-[90%]  ${
         studentStore.errorCard === meeting.time_slot_id
           ? 'border border-red-500'
           : ''

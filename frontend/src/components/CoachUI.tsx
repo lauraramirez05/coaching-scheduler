@@ -83,7 +83,7 @@ const CoachUI = observer(() => {
                 {coachStore.displayedMeetings.length === 0 ? (
                   <p>There are no {timeSlotStore.meetingStatus} slots</p>
                 ) : (
-                  <div className=' flex flex-col gap-4 mt-4 w-full max-h-[470px] overflow-y-auto'>
+                  <div className=' flex flex-col gap-4 mt-4 w-full h-[calc(100vh-230px)] max-h-[470px] sm:max-h-[600px] overflow-y-auto'>
                     {coachStore.displayedMeetings.map((meeting) => (
                       <MeetingCard
                         meeting={meeting}

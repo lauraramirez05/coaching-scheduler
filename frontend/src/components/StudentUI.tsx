@@ -88,7 +88,7 @@ const StudentUI = observer(() => {
         />
       </div>
 
-      <div className='flex justify-around w-full gap-4'>
+      <div className='flex justify-around w-full gap-4 '>
         <div>
           <Calendar
             meetings={studentStore.bookedMeetings}
@@ -102,7 +102,7 @@ const StudentUI = observer(() => {
               <MeetingFilterModal />
               {timeSlotStore.meetingStatus === 'available'}{' '}
               {
-                <div className='flex justify-between my-4'>
+                <div className=' flex justify-between my-4 flex-wrap md:flex-nowrap '>
                   {timeSlotStore.meetingStatus === 'available' &&
                     userStore.currentUser &&
                     coachStore.coaches &&
@@ -123,8 +123,7 @@ const StudentUI = observer(() => {
                     })}
                 </div>
               }
-              <div className=' flex flex-col gap-4 mt-4 w-full max-h-[470px] overflow-y-auto'>
-                {' '}
+              <div className='flex flex-col items-center gap-4 mt-4 h-[calc(100vh-230px)] max-h-[470px] sm:max-h-[600px] overflow-y-auto px-4 '>
                 {studentStore.displayedMeetings.map((meeting) => {
                   return <MeetingCard meeting={meeting} />;
                 })}
