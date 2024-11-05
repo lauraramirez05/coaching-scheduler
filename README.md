@@ -35,7 +35,7 @@ To get started with the application, follow the instructions below:
 
 ####Front End
 - Head to the frontend directory
- ``` npm i
+` npm i`
      npm run dev ```
 
 ####Front End
