@@ -33,10 +33,10 @@ To get started with the application, follow the instructions below:
 
 ### Clone the Repository
 
-####Front End
+#### Front End
 - Head to the frontend directory
 ` npm run dev `
 
-####Back End
+#### Back End
 `npm run start`
 
